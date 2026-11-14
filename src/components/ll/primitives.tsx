@@ -11,7 +11,7 @@ export function Panel({ title, icon: Icon, action, className, children, subtitle
   return (
     <section className={cn("glass glow-border rounded-2xl", className)}>
       {(title || action) && (
-        <header className="flex items-start justify-between gap-3 px-5 pt-4">
+        <header className="flex items-start justify-between gap-3 px-4 pt-3">
           <div className="min-w-0">
             {title && (
               <h3 className="flex items-center gap-2 text-sm font-semibold tracking-tight">
@@ -24,18 +24,18 @@ export function Panel({ title, icon: Icon, action, className, children, subtitle
           {action}
         </header>
       )}
-      <div className={cn("p-5", title && "pt-3", bodyClass)}>{children}</div>
+      <div className={cn("p-4", title && "pt-2.5", bodyClass)}>{children}</div>
     </section>
   );
 }
 
 export function PageHeader({ eyebrow, title, description, children }: { eyebrow?: string; title: React.ReactNode; description?: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">
+    <div className="mb-4 flex flex-col gap-3 md:mb-5 md:flex-row md:items-end md:justify-between">
       <div className="max-w-3xl">
         {eyebrow && <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-primary-glow">{eyebrow}</p>}
-        <h1 className="text-gradient text-3xl font-semibold leading-tight md:text-[2.6rem]">{title}</h1>
-        {description && <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">{description}</p>}
+        <h1 className="text-gradient text-2xl font-semibold leading-tight md:text-[2rem]">{title}</h1>
+        {description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>}
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
@@ -70,7 +70,7 @@ export function StatusPill({ status }: { status: TaskStatus }) {
 
 export function Stat({ label, value, sub, icon: Icon, color, hint, className }: { label: string; value: React.ReactNode; sub?: React.ReactNode; icon?: LucideIcon; color?: string; hint?: string; className?: string }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn("glass glow-border relative overflow-hidden rounded-2xl p-4", className)}>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn("glass glow-border relative overflow-hidden rounded-xl p-3", className)}>
       <div className="pointer-events-none absolute -right-8 -top-8 size-24 rounded-full opacity-30 blur-2xl" style={{ background: color ?? "var(--primary)" }} />
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
@@ -86,7 +86,7 @@ export function Stat({ label, value, sub, icon: Icon, color, hint, className }: 
           {Icon && <Icon className="size-4" style={{ color: color ?? "var(--primary-glow)" }} aria-hidden />}
         </span>
       </div>
-      <div className="mt-2 font-display text-2xl font-semibold tracking-tight md:text-[1.7rem]">{value}</div>
+      <div className="mt-1.5 font-display text-xl font-semibold tracking-tight md:text-2xl">{value}</div>
       {sub && <div className="mt-1 text-xs text-muted-foreground">{sub}</div>}
     </motion.div>
   );

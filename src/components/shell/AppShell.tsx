@@ -57,7 +57,7 @@ function NavList({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?: 
             onClick={onNavigate}
             title={collapsed ? t(n.key) : undefined}
             className={cn(
-              "group relative flex h-10 items-center gap-3 rounded-xl px-3 text-sm transition-colors",
+              "group relative flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] transition-colors",
               active ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
               collapsed && "justify-center px-0",
             )}
@@ -105,8 +105,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-h-dvh w-full">
         {/* Desktop rail */}
-        <aside className={cn("glass-strong sticky top-0 hidden h-dvh shrink-0 flex-col border-r transition-[width] duration-300 lg:flex", collapsed ? "w-[72px]" : "w-60")}>
-          <div className={cn("flex h-16 items-center px-4", collapsed && "justify-center px-0")}>
+        <aside className={cn("glass-strong sticky top-0 hidden h-dvh shrink-0 flex-col border-r transition-[width] duration-300 lg:flex", collapsed ? "w-14" : "w-52")}>
+          <div className={cn("flex h-12 items-center px-3", collapsed && "justify-center px-0")}>
             <Link to="/" aria-label="LoopLocal home">
               <Logo compact={collapsed} />
             </Link>
@@ -124,7 +124,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="glass-strong sticky top-0 z-40 border-b">
-            <div className="flex h-14 items-center gap-2 px-3 md:px-5">
+            <div className="flex h-11 items-center gap-2 px-3 md:px-4">
               <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="grid size-9 place-items-center rounded-xl border lg:hidden">
                 <Menu className="size-4" />
               </button>
@@ -138,14 +138,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <IconButtons />
               </div>
             </div>
-            <div className="flex items-center gap-2 overflow-x-auto border-t px-3 py-2 no-scrollbar md:px-5">
+            <div className="flex items-center gap-2 overflow-x-auto border-t px-3 py-1.5 no-scrollbar md:px-4">
               <LocalityHubSelect />
               <ScenarioSwitch />
               <ClockControl className="ml-auto" />
             </div>
           </header>
 
-          <main className="relative flex-1 px-3 py-6 md:px-6 md:py-8 xl:px-8">
+          <main className="relative flex-1 px-3 py-4 md:px-5 md:py-5 xl:px-6">
             <AnimatePresence mode="wait">
               <motion.div key={path} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.28, ease: [0.2, 0.7, 0.2, 1] }}>
                 {children}
@@ -153,7 +153,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </AnimatePresence>
           </main>
 
-          <footer className="border-t px-4 py-5 text-xs text-muted-foreground md:px-8">
+          <footer className="border-t px-4 py-3 text-xs text-muted-foreground md:px-6">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <p className="flex items-center gap-2"><Logo compact /> <span>LoopLocal · the neighbourhood layer for water, power, waste and drains · Hyderabad</span></p>
               <p className="font-medium text-foreground/80">The software recommends; people carry out the actions.</p>
