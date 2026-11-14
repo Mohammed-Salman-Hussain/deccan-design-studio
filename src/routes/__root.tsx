@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "LoopLocal — a neighbourhood where nothing is wasted" },
       { name: "description", content: "LoopLocal joins a neighbourhood's water, power, waste and drains into one loop controller for Hyderabad colonies." },
       { name: "author", content: "LoopLocal" },
-      { name: "theme-color", content: "#09251C" },
+      { name: "theme-color", content: "#930031" },
       { property: "og:title", content: "LoopLocal — a neighbourhood where nothing is wasted" },
       { property: "og:description", content: "One engine that makes a locality's water, power, waste and drains help each other." },
       { property: "og:type", content: "website" },
@@ -113,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

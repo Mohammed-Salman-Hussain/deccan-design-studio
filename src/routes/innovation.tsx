@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
 import { ArrowRight, Battery, Building2, Copy, Network, Share2, Sparkles, Target, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Panel } from "@/components/ll/primitives";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/innovation")({
   head: () => ({
@@ -26,10 +26,10 @@ const IDEAS = [
 ];
 
 const SDGS = [
-  { n: 6, color: "#26bde2", title: "Clean water and sanitation", body: "Recharge pits, treated-water reuse and fewer tanker trips." },
-  { n: 7, color: "#fcc30b", title: "Affordable and clean energy", body: "Pumps and STP blowers scheduled into solar hours; biogas for backup." },
-  { n: 9, color: "#fd6925", title: "Industry, innovation and infrastructure", body: "A software layer that makes existing buildings and utilities more resilient." },
-  { n: 11, color: "#fd9d24", title: "Sustainable cities and communities", body: "Fewer flooded streets, fewer outages, wet waste kept out of drains." },
+  { n: 6, bg: "var(--loop-rain)", fg: "#ffffff", title: "Clean water and sanitation", body: "Recharge pits, treated-water reuse and fewer tanker trips." },
+  { n: 7, bg: "var(--brand-orange)", fg: "var(--primary-foreground)", title: "Affordable and clean energy", body: "Pumps and STP blowers scheduled into solar hours; biogas for backup." },
+  { n: 9, bg: "var(--brand-burgundy)", fg: "#ffffff", title: "Industry, innovation and infrastructure", body: "A software layer that makes existing buildings and utilities more resilient." },
+  { n: 11, bg: "var(--brand-yellow)", fg: "var(--primary-foreground)", title: "Sustainable cities and communities", body: "Fewer flooded streets, fewer outages, wet waste kept out of drains." },
 ];
 
 const LANDSCAPE = [
@@ -42,21 +42,32 @@ const LANDSCAPE = [
 function InnovationPage() {
   return (
     <div className="mx-auto max-w-[1300px]">
-      <PageHeader eyebrow="Innovation in infrastructure" title="A neighbourhood layer that joins the loops" description="Cities already have command centres, flood alerts and energy platforms. They work at city scale or on one problem. LoopLocal works at neighbourhood scale, joins all the loops and turns data into dispatched actions.">
+      <PageHeader title="Innovation" description="Cities already have command centres, flood alerts and energy platforms. They work at city scale or on one problem. LoopLocal works at neighbourhood scale, joins all the loops and turns data into dispatched actions.">
         <Button asChild variant="hero"><Link to="/storm">See it in a storm <ArrowRight /></Link></Button>
       </PageHeader>
 
+      <Tabs defaultValue="ideas">
+        <TabsList>
+          <TabsTrigger value="ideas">Ideas</TabsTrigger>
+          <TabsTrigger value="sits">Where it sits</TabsTrigger>
+          <TabsTrigger value="differs">How it differs</TabsTrigger>
+          <TabsTrigger value="goals">Goals</TabsTrigger>
+        </TabsList>
+        <TabsContent value="ideas" className="mt-3">
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {IDEAS.map((i, n) => (
-          <motion.article key={i.title} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: n * 0.04 }} className="glass glow-border rounded-xl p-4">
+          <article key={i.title} className="glass rounded-xl p-4">
             <span className="grid size-9 place-items-center rounded-lg bg-primary/15 text-primary-glow"><i.icon className="size-4" aria-hidden /></span>
             <h3 className="mt-3 text-sm font-semibold">{i.title}</h3>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{i.body}</p>
-          </motion.article>
+          </article>
         ))}
       </div>
 
-      <Panel title="Where LoopLocal sits" subtitle="The hub-side engine that feeds city platforms" icon={Sparkles} className="mt-4">
+        </TabsContent>
+
+        <TabsContent value="sits" className="mt-3">
+      <Panel title="Where LoopLocal sits" subtitle="The hub-side engine that feeds city platforms. LoopLocal does not replace them: it gives them hub-level data and turns their alerts into scheduled actions."  icon={Sparkles}>
         <svg viewBox="0 0 900 190" className="h-auto w-full" role="img" aria-label="Loop Hubs feed the LoopLocal Core, which feeds city platforms">
           {[0, 1, 2].map((i) => (
             <g key={i} transform={`translate(20 ${20 + i * 52})`}>
@@ -78,10 +89,10 @@ function InnovationPage() {
             </g>
           ))}
         </svg>
-        <p className="mt-2 text-xs text-muted-foreground">LoopLocal does not replace these systems. It is the neighbourhood-side layer that gives them hub-level data and turns their alerts into scheduled local actions.</p>
       </Panel>
+        </TabsContent>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[1.3fr_1fr]">
+        <TabsContent value="differs" className="mt-3">
         <Panel title="How it differs from what exists" subtitle="No product we found does exactly this, though we cannot prove none exists" icon={Target}>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-xs">
@@ -93,17 +104,21 @@ function InnovationPage() {
             </table>
           </div>
         </Panel>
+        </TabsContent>
+
+        <TabsContent value="goals" className="mt-3">
         <Panel title="The universal goals it serves" icon={Sparkles}>
           <ul className="space-y-3">
             {SDGS.map((g) => (
               <li key={g.n} className="flex items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg font-display text-lg font-bold text-black/80" style={{ background: g.color }} aria-hidden>{g.n}</span>
+                <span className="grid size-10 shrink-0 place-items-center rounded-lg font-display text-lg font-bold" style={{ background: g.bg, color: g.fg }} aria-hidden>{g.n}</span>
                 <div><p className="text-sm font-medium">SDG {g.n} · {g.title}</p><p className="text-xs text-muted-foreground">{g.body}</p></div>
               </li>
             ))}
           </ul>
         </Panel>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

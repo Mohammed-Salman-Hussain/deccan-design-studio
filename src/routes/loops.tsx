@@ -1,15 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Send, Sparkles } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LOOPS, LOOP_BY_ID } from "@/lib/sim/loops";
 import type { LoopId } from "@/lib/sim/types";
 import { fmtL, fmtRs, useActionQueue, useLocality, useLocalitySummary } from "@/lib/hooks";
 import { useApp } from "@/store/app";
-import { LoopChip, Meter, PageHeader, Panel, StatusPill } from "@/components/ll/primitives";
-import { AnimatedNumber } from "@/components/ll/AnimatedNumber";
-import { cn } from "@/lib/utils";
+import { LoopChip, PageHeader, Panel, StatusPill } from "@/components/ll/primitives";
 
 export const Route = createFileRoute("/loops")({
   head: () => ({
@@ -131,15 +130,14 @@ function LoopsPage() {
 
   return (
     <div className="mx-auto max-w-[1500px]">
-      <PageHeader eyebrow="One engine, five loops" title="Where every output becomes an input" description={`Live flows for ${loc.name} across all hubs. Click any node to see what happens there and the action the engine would dispatch.`}>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Highlight a loop">
-          <Button size="sm" variant={focus === "all" ? "soft" : "glass"} onClick={() => setFocus("all")}>All loops</Button>
-          {LOOPS.map((l) => (
-            <Button key={l.id} size="sm" variant={focus === l.id ? "soft" : "glass"} onClick={() => setFocus(l.id)} style={focus === l.id ? { color: l.color } : undefined}>
-              <l.icon aria-hidden /> {l.short}
-            </Button>
-          ))}
-        </div>
+      <PageHeader title="Loops" description={`Live flows for ${loc.name} across all hubs, where every output becomes an input. Select any box to see what happens there and the action the engine would dispatch. Use the filter to follow one loop.`}>
+        <Select value={focus} onValueChange={(v) => setFocus(v as LoopId | "all")}>
+          <SelectTrigger aria-label="Highlight a loop" className="h-9 w-48 text-sm"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All loops</SelectItem>
+            {LOOPS.map((l) => <SelectItem key={l.id} value={l.id}>{l.short}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </PageHeader>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
@@ -189,7 +187,7 @@ function LoopsPage() {
               );
             })}
             <g transform="translate(790 70)">
-              <rect width={160} height={74} rx={14} fill="var(--surface)" stroke="var(--primary-glow)" strokeOpacity={0.5} />
+              <rect width={160} height={74} rx={14} fill="var(--surface)" stroke="var(--primary-glow)" strokeOpacity={0.6} />
               <text x={14} y={24} fontSize={9.5} fill="var(--muted-foreground)" style={{ textTransform: "uppercase", letterSpacing: 1 }}>Loop Score</text>
               <text x={14} y={56} fontSize={28} fontWeight={700} fill="var(--primary-glow)" style={{ fontFamily: "var(--font-display)" }}>{sum.score.toFixed(1)}</text>
               <text x={150} y={56} fontSize={10} textAnchor="end" fill="var(--muted-foreground)">of 100</text>
@@ -201,61 +199,37 @@ function LoopsPage() {
         <div className="space-y-4">
           <AnimatePresence mode="wait">
             <motion.div key={selected} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-              <Panel title={node.label} subtitle={node.sub} action={<LoopChip loop={node.loop} />}>
-                <dl className="space-y-3 text-sm">
-                  <div><dt className="text-[11px] uppercase tracking-wider text-muted-foreground">What happens here</dt><dd className="mt-0.5">{node.what}</dd></div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Fed by</dt><dd className="mt-0.5 text-xs">{node.fedBy}</dd></div>
-                    <div><dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Feeds</dt><dd className="mt-0.5 text-xs">{node.feeds}</dd></div>
-                  </div>
-                  <div className="rounded-lg border bg-muted/30 p-3">
-                    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-primary-glow"><Sparkles className="size-3" aria-hidden /> Why this matters</dt>
-                    <dd className="mt-1 text-xs text-muted-foreground">{loop.why}</dd>
-                  </div>
-                  <div className="rounded-lg border p-3" style={{ borderColor: `color-mix(in oklab, ${loop.color} 40%, transparent)` }}>
-                    <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Action the engine would dispatch</dt>
-                    {nextAction ? (
-                      <dd className="mt-1.5 space-y-2">
-                        <p className="text-sm font-medium">{nextAction.title}</p>
-                        <p className="text-xs text-muted-foreground">{nextAction.reason}</p>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs text-muted-foreground">{nextAction.assignee} · by {nextAction.deadline}</span>
-                          {nextAction.status === "pending" ? (
-                            <Button size="sm" variant="hero" onClick={() => dispatch(nextAction, "Officer")}><Send /> Dispatch</Button>
-                          ) : (
-                            <StatusPill status={nextAction.status} />
-                          )}
-                        </div>
-                      </dd>
-                    ) : (
-                      <dd className="mt-1 text-xs text-muted-foreground">Nothing to dispatch for this loop right now. Try the Storm day scenario.</dd>
-                    )}
-                  </div>
-                </dl>
+              <Panel
+                title={node.label}
+                subtitle={<><span className="block"><strong className="text-foreground">Fed by:</strong> {node.fedBy}</span><span className="mt-1 block"><strong className="text-foreground">Feeds:</strong> {node.feeds}</span><span className="mt-2 block">{loop.why}</span></>}
+                action={<LoopChip loop={node.loop} />}
+              >
+                <p className="text-sm text-muted-foreground">{node.what}</p>
+                <div className="mt-4 rounded-lg border p-3">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Next action for this loop</p>
+                  {nextAction ? (
+                    <div className="mt-1.5 space-y-2">
+                      <p className="text-sm font-medium">{nextAction.title}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">{nextAction.assignee} · by {nextAction.deadline}</span>
+                        {nextAction.status === "pending" ? (
+                          <Button size="sm" variant="hero" onClick={() => dispatch(nextAction, "Officer")}><Send /> Dispatch</Button>
+                        ) : (
+                          <StatusPill status={nextAction.status} />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{nextAction.reason}</p>
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-xs text-muted-foreground">Nothing to dispatch for this loop right now. Try the Storm day scenario.</p>
+                  )}
+                </div>
               </Panel>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {LOOPS.map((l, i) => (
-          <button key={l.id} onClick={() => setFocus(l.id)} className={cn("glass glow-border rounded-xl p-3 text-left transition hover:-translate-y-0.5", focus === l.id && "ring-1 ring-primary-glow")}>
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Loop {i + 1}</span>
-              <l.icon className="size-4" style={{ color: l.color }} aria-hidden />
-            </div>
-            <p className="mt-1 text-sm font-semibold">{l.name}</p>
-            <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground"><span>{l.from}</span><ArrowRight className="size-3" style={{ color: l.color }} /><span>{l.to}</span></div>
-            <div className="mt-3 flex items-end justify-between">
-              <span className="font-display text-2xl font-semibold tabular" style={{ color: l.color }}><AnimatedNumber value={sum.scores[l.id]} decimals={0} /></span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">loop score</span>
-            </div>
-            <Meter value={sum.scores[l.id]} color={l.color} className="mt-1.5" label={`${l.short} score`} />
-            <p className="mt-2 text-[11px] leading-snug text-muted-foreground">{l.why}</p>
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

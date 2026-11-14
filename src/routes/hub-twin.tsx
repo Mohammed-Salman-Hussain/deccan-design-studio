@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useState } from "react";
-import { Flame, Sun, Droplets, CloudRain, Zap, Gauge, Building2 } from "lucide-react";
+import { Sun, CloudRain, Zap, Gauge, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/app";
 import { fmtL, useHub, useHubSummary, useStepClock } from "@/lib/hooks";
@@ -92,7 +92,7 @@ function HubTwinPage() {
 
   return (
     <div className="mx-auto max-w-[1500px]">
-      <PageHeader eyebrow={`Hub Twin · ${hub.name} · ${hub.flats} flats`} title="A day in the life of one hub" description="Drag the timeline or jump to a moment. Flows, tank level and the outage state update with the hub's own numbers.">
+      <PageHeader title="Hub Twin" description={`A day in the life of ${hub.name} (${hub.flats} flats). Drag the timeline or jump to a moment. Flows, tank level and the outage state update with the hub's own numbers.`}>
         <div className="inline-flex rounded-lg border p-0.5" role="group" aria-label="Compare with and without LoopLocal">
           <Button size="sm" variant={withLoop ? "soft" : "ghost"} aria-pressed={withLoop} onClick={() => setWithLoop(true)}>With LoopLocal</Button>
           <Button size="sm" variant={!withLoop ? "soft" : "ghost"} aria-pressed={!withLoop} onClick={() => setWithLoop(false)}>Without</Button>
@@ -105,7 +105,7 @@ function HubTwinPage() {
             <svg viewBox="0 0 960 545" className="h-auto w-full" role="img" aria-label={`Cross-section of ${hub.name} at ${formatClock(clock)}. Tank ${Math.round(p.tankPct)} percent. ${p.outage ? "Grid outage in progress." : "Grid supply on."}`}>
               <defs>
                 <linearGradient id="twin-sky" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={night ? "#050f0c" : w.cloud > 0.6 ? "#16342b" : "#1d4a3b"} />
+                  <stop offset="0%" stopColor={night ? "#2B3A5E" : w.cloud > 0.6 ? "#C9D6E6" : "#BEDEFF"} />
                   <stop offset="100%" stopColor="var(--background)" />
                 </linearGradient>
                 <linearGradient id="twin-water" x1="0" y1="0" x2="0" y2="1">
@@ -117,7 +117,7 @@ function HubTwinPage() {
               {!night && <circle cx="110" cy="70" r={26} fill="var(--loop-solar)" opacity={Math.max(0.15, 1 - w.cloud)} />}
               {night && <circle cx="110" cy="70" r={16} fill="var(--cream)" opacity={0.7} />}
               {w.cloud > 0.4 && (
-                <g fill="var(--muted)" opacity={Math.min(0.9, w.cloud)}>
+                <g fill="#ffffff" opacity={Math.min(0.95, w.cloud)}>
                   <ellipse cx="180" cy="60" rx="52" ry="16" /><ellipse cx="220" cy="48" rx="40" ry="14" /><ellipse cx="740" cy="52" rx="60" ry="17" /><ellipse cx="790" cy="42" rx="40" ry="13" />
                 </g>
               )}
@@ -129,7 +129,7 @@ function HubTwinPage() {
                 </g>
               )}
               {/* ground */}
-              <rect y="440" width="960" height="105" fill="#0c2a21" />
+              <rect y="440" width="960" height="105" fill="#C9DDF5" />
               <rect y="438" width="960" height="4" fill="var(--loop-waste)" opacity="0.35" />
 
               {/* building */}
@@ -137,7 +137,7 @@ function HubTwinPage() {
               <rect x="330" y="122" width="300" height="9" rx="2" fill="var(--muted)" />
               {Array.from({ length: 5 }, (_, f) =>
                 Array.from({ length: 4 }, (_, c) => (
-                  <rect key={`${f}-${c}`} x={362 + c * 62} y={142 + f * 58} width={38} height={34} rx={3} fill={windowsLit ? (((f * 3 + c * 5) % 7) > 1 ? "#f6c46b" : "#28463d") : "#12251f"} opacity={windowsLit ? 0.9 : 0.7} />
+                  <rect key={`${f}-${c}`} x={362 + c * 62} y={142 + f * 58} width={38} height={34} rx={3} fill={windowsLit ? (((f * 3 + c * 5) % 7) > 1 ? "#FFF2A7" : "#7FA6D4") : "#5D7AA3"} opacity={windowsLit ? 0.9 : 0.7} />
                 )),
               )}
               {/* kitchens band */}
@@ -219,7 +219,7 @@ function HubTwinPage() {
                 </button>
               ))}
             </div>
-            <p className="rounded-lg border bg-muted/30 p-3 text-sm"><span className="font-medium text-primary-glow">{activePhase.label}.</span> {activePhase.text}</p>
+            <p className="rounded-lg bg-brand-yellow/50 p-3 text-sm"><span className="font-medium text-primary-glow">{activePhase.label}.</span> {activePhase.text}</p>
           </div>
         </Panel>
 
@@ -227,13 +227,11 @@ function HubTwinPage() {
           <div className="grid grid-cols-2 gap-3">
             <Stat label="Tank" value={`${Math.round(p.tankPct)}%`} sub={`${hub.ohtKL} kL overhead`} icon={Gauge} color="var(--loop-reuse)" />
             <Stat label="Solar" value={`${p.solarKW.toFixed(1)} kW`} sub={`${hub.solarKwp} kWp roof`} icon={Sun} color="var(--loop-solar)" />
-            <Stat label="Biogas" value={`${p.biogasKW.toFixed(1)} kW`} sub={hub.biogasKgDay > 0 ? `${hub.biogasKgDay} kg/day unit` : "No unit"} icon={Flame} color="var(--loop-waste)" />
             <Stat label="Pump" value={p.pumpOn ? "ON" : "Off"} sub={p.pumpOn ? `${p.pumpKW.toFixed(1)} kW on ${p.pumpSource}` : "waiting for sun"} icon={Zap} color="var(--loop-save)" />
             <Stat label="Recharged" value={fmtL(sum.rechargeL)} sub="so far today" icon={CloudRain} color="var(--loop-rain)" />
-            <Stat label="Treated reuse" value={fmtL(sum.reuseL + sum.pitTopupL)} sub="on site and pits" icon={Droplets} color="var(--loop-reuse)" />
           </div>
 
-          <Panel title="With LoopLocal vs without" subtitle="Same hub, same day, same weather" icon={Building2}>
+          <Panel title="With LoopLocal vs without" subtitle="Same hub, same day, same weather. Both columns come from the same hourly model; the formulas are in the Assumptions drawer." icon={Building2}>
             <div className="overflow-hidden rounded-lg border text-xs">
               <div className="grid grid-cols-[1.4fr_1fr_1fr] bg-muted/40 px-3 py-1.5 font-medium text-muted-foreground"><span>So far today</span><span className="text-right">With</span><span className="text-right">Without</span></div>
               {rows.map((r) => (
@@ -244,7 +242,6 @@ function HubTwinPage() {
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">Computed from the same hourly model for both columns. Formulas are in the Assumptions drawer.</p>
           </Panel>
         </div>
       </div>

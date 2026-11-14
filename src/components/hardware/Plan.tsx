@@ -7,9 +7,9 @@ import { CHECKLISTS, NO_HARDWARE, PHASES, type Availability, type RoleKey } from
 import { cn } from "@/lib/utils";
 
 const AVAIL_STYLE: Record<Availability, string> = {
-  Public: "border-success/30 bg-success/15 text-success",
-  "Needs permission": "border-warning/30 bg-warning/15 text-warning",
-  Simulated: "border-info/30 bg-info/15 text-info",
+  Public: "border-success/30 bg-success/10 text-success",
+  "Needs permission": "border-warning/30 bg-brand-yellow/60 text-warning",
+  Simulated: "border-primary-glow/30 bg-primary-glow/10 text-primary-glow",
 };
 
 export function NoHardware() {
@@ -65,7 +65,7 @@ export function Checklists() {
             const on = !!checks[keyOf(i)];
             return (
               <li key={id}>
-                <label htmlFor={id} className={cn("flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition hover:bg-accent/40", on && "bg-primary/10")}>
+                <label htmlFor={id} className={cn("flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition hover:bg-accent/40", on && "bg-accent")}>
                   <input id={id} type="checkbox" checked={on} onChange={() => toggle(keyOf(i))} className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]" />
                   <span className={cn(on && "text-muted-foreground line-through")}>{item}</span>
                 </label>
@@ -83,10 +83,10 @@ export function Rollout() {
     <Panel title="Phased rollout" subtitle="Each phase has to prove itself before the next begins" icon={Milestone}>
       <ol className="relative grid gap-3 lg:grid-cols-4">
         {PHASES.map((p, i) => (
-          <li key={p.id} className={cn("relative rounded-xl border p-3.5", i === 0 && "border-primary/50 bg-primary/10")}>
+          <li key={p.id} className={cn("relative rounded-xl border p-3.5", i === 0 && "border-primary bg-brand-yellow/40")}>
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10px] uppercase tracking-wider text-primary-glow">Step {i}</span>
-              {i === 0 && <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-medium text-primary-glow"><CheckCircle2 className="size-3" aria-hidden /> You are here</span>}
+              {i === 0 && <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground"><CheckCircle2 className="size-3" aria-hidden /> You are here</span>}
             </div>
             <h3 className="mt-1 text-sm font-semibold">{p.name}</h3>
             <dl className="mt-2 space-y-2 text-xs">

@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 
 const WEIGHT: Record<CostBand, number> = { Low: 1, Medium: 3, High: 8 };
 const COST_STYLE: Record<CostBand, string> = {
-  Low: "border-success/30 bg-success/15 text-success",
-  Medium: "border-warning/30 bg-warning/15 text-warning",
-  High: "border-destructive/30 bg-destructive/15 text-destructive",
+  Low: "border-success/30 bg-success/10 text-success",
+  Medium: "border-warning/30 bg-brand-yellow/60 text-warning",
+  High: "border-destructive/30 bg-destructive/10 text-destructive",
 };
 
 export function Sizer() {
@@ -41,7 +41,7 @@ export function Sizer() {
           <legend className="mb-1.5 text-xs text-muted-foreground">Loops to include</legend>
           <div className="space-y-1.5">
             {LOOPS.map((l) => (
-              <label key={l.id} htmlFor={`sz-${l.id}`} className={cn("flex cursor-pointer items-center gap-2.5 rounded-lg border px-2.5 py-2 text-xs transition hover:bg-accent/40", loops[l.id] && "bg-primary/10")}>
+              <label key={l.id} htmlFor={`sz-${l.id}`} className={cn("flex cursor-pointer items-center gap-2.5 rounded-lg border px-2.5 py-2 text-xs transition hover:bg-accent/40", loops[l.id] && "bg-accent")}>
                 <input id={`sz-${l.id}`} type="checkbox" checked={loops[l.id]} onChange={() => setLoops((p) => ({ ...p, [l.id]: !p[l.id] }))} className="size-4 accent-[var(--primary)]" />
                 <l.icon className="size-3.5" style={{ color: l.color }} aria-hidden />
                 <span>{l.short}</span>

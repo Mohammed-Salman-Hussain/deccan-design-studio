@@ -14,3 +14,8 @@ export const NAV = [
   { to: "/security", key: "nav.security" as TKey, icon: ShieldCheck },
   { to: "/innovation", key: "nav.innovation" as TKey, icon: Lightbulb },
 ] as const;
+
+/** The six pages people use every day. */
+export const NAV_MAIN = NAV.slice(0, 6);
+/** Reference pages, kept one click away under "More". */
+export const NAV_MORE = NAV.slice(6);

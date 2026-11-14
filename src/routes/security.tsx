@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Check, Cpu, FileKey2, Network, ScrollText, ShieldCheck, Users, X, Cloud, type LucideIcon } from "lucide-react";
 import { useApp } from "@/store/app";
 import { PageHeader, Panel } from "@/components/ll/primitives";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/security")({
@@ -35,7 +36,7 @@ const LAYERS: Layer[] = [
 ];
 
 const THREATS: { threat: string; control: string; layer: string }[] = [
-  { threat: "A fake sensor sends false tank levels", control: "Device certificates and per-device topics; unknown identities are rejected at the broker", layer: "Devices" },
+  { threat: "A spoofed sensor sends false tank levels", control: "Device certificates and per-device topics; unknown identities are rejected at the broker", layer: "Devices" },
   { threat: "Tampered firmware on a gateway", control: "Secure boot, signed OTA updates, tamper alerts", layer: "Devices" },
   { threat: "Someone listens in on telemetry", control: "TLS everywhere; private APN or VPN on cellular links", layer: "Network" },
   { threat: "Old messages replayed to trigger a pump", control: "Timestamps, sequence numbers and replay rejection", layer: "Network" },
@@ -63,11 +64,18 @@ function SecurityPage() {
   const radii = [58, 88, 118, 148, 178];
 
   return (
-    <div className="mx-auto max-w-[1400px]">
-      <PageHeader eyebrow="Security" title="Built in at every layer" description="From the sensor in a tank to the officer pressing Dispatch. These are the controls designed into LoopLocal's production layer.">
-        <span className="rounded-full border px-3 py-1 text-xs text-muted-foreground">Design controls for the integration plan</span>
-      </PageHeader>
+    <div className="mx-auto max-w-[1200px]">
+      <PageHeader title="Security" description="From the sensor in a tank to the officer pressing Dispatch. These are design controls for LoopLocal's production layer, part of the integration plan. They describe what the system is built to do; they are not an audit result. Principles that do not change: sensors measure water, power and waste rather than people; resident reports hold only a category, a pin and a note; and the software recommends while people carry out the actions." />
 
+      <Tabs defaultValue="layers">
+        <TabsList>
+          <TabsTrigger value="layers">Layers</TabsTrigger>
+          <TabsTrigger value="threats">Threats</TabsTrigger>
+          <TabsTrigger value="access">Who can do what</TabsTrigger>
+          <TabsTrigger value="audit">Audit trail</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="layers" className="mt-3">
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
         <Panel bodyClass="p-3">
           <svg viewBox="0 0 400 400" className="mx-auto h-auto w-full max-w-[460px]" role="img" aria-label="Five concentric security layers from devices at the centre to people and process on the outside">
@@ -102,8 +110,9 @@ function SecurityPage() {
           </div>
         </Panel>
       </div>
+        </TabsContent>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[1.4fr_1fr]">
+        <TabsContent value="threats" className="mt-3">
         <Panel title="Threat to control" subtitle="What could go wrong, and what stops it" icon={ShieldCheck}>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[520px] text-left text-xs">
@@ -114,7 +123,9 @@ function SecurityPage() {
             </table>
           </div>
         </Panel>
+        </TabsContent>
 
+        <TabsContent value="access" className="mt-3">
         <Panel title="Who can do what" subtitle="Role-based access" icon={Users}>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[360px] text-xs">
@@ -132,24 +143,18 @@ function SecurityPage() {
             </table>
           </div>
         </Panel>
-      </div>
+        </TabsContent>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
-        <Panel title="Live audit trail" subtitle="Every dispatch, completion and verification in this session" icon={ScrollText}>
+        <TabsContent value="audit" className="mt-3">
+        <Panel title="Live audit trail" subtitle="Every dispatch, completion and verification in this session." icon={ScrollText}>
           <ol className="max-h-72 space-y-1.5 overflow-y-auto pr-1 text-xs">
             {audit.slice(0, 14).map((a) => (
               <li key={a.id} className="grid grid-cols-[64px_1fr] gap-2 rounded-lg border px-2.5 py-1.5"><span className="font-mono text-[10px] text-muted-foreground">{a.sim}</span><span><strong className="font-medium">{a.actor}</strong> · {a.text}</span></li>
             ))}
           </ol>
         </Panel>
-        <Panel title="Principles" subtitle="What does not change, whatever the technology" icon={ShieldCheck}>
-          <dl className="space-y-3 text-sm">
-            {[["Data minimisation", "Sensors measure water, power and waste, not people. Resident reports hold a category, a pin and a note."], ["Human in the loop", "The software recommends; people carry out the actions. Nothing is dispatched without a named person."], ["Local fallback", "If the cloud link drops, the gateway keeps running its local rules so tanks still fill and alerts still fire."], ["Honest limits", "This page describes the controls designed for the production layer. The prototype itself connects to no real device and holds no personal data."]].map(([t, d]) => (
-              <div key={t}><dt className="font-medium text-primary-glow">{t}</dt><dd className="mt-0.5 text-xs text-muted-foreground">{d}</dd></div>
-            ))}
-          </dl>
-        </Panel>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

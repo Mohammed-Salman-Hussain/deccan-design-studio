@@ -1,21 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, ShieldAlert, Camera, Mic, Square, CheckCircle2, WifiOff, Wifi, ChevronRight, Truck, Zap, Droplets, ListChecks, Inbox, Play, Trash2, CloudUpload } from "lucide-react";
+import { MapPin, Clock, ShieldAlert, Camera, Mic, Square, CheckCircle2, WifiOff, Wifi, ChevronRight, Inbox, Play, Trash2, CloudUpload } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/store/app";
 import { useLocality, useT } from "@/lib/hooks";
 import { LOOP_BY_ID } from "@/lib/sim/loops";
 import type { TaskRecord } from "@/lib/sim/types";
-import { LoopChip, Panel, StatusPill, EmptyState } from "@/components/ll/primitives";
+import { LoopChip, Meter, StatusPill, EmptyState } from "@/components/ll/primitives";
 import { LocalityMap } from "@/components/map/LocalityMap";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LangSwitch } from "@/components/shell/Controls";
 import { cn } from "@/lib/utils";
 import { resizeImage } from "@/lib/image";
-import { LoopRing } from "@/components/ll/LoopRing";
 
 export function WorkerView() {
   const t = useT();
@@ -41,9 +39,9 @@ export function WorkerView() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <div className="glass glow-border flex flex-col gap-4 rounded-2xl p-4 md:flex-row md:items-center">
+      <div className="glass flex flex-col gap-4 rounded-xl p-4 md:flex-row md:items-center">
         <div className="flex flex-1 items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl bg-primary/15 font-display text-lg font-semibold text-primary-glow">{crew === "all" ? "FC" : crew.slice(0, 2).toUpperCase()}</div>
+          <div className="grid size-12 place-items-center rounded-xl bg-accent font-display text-lg font-semibold text-primary-glow">{crew === "all" ? "FC" : crew.slice(0, 2).toUpperCase()}</div>
           <div>
             <p className="text-xs text-muted-foreground">Field crew app · {loc.name}</p>
             <Select value={crew} onValueChange={setCrew}>
@@ -56,7 +54,6 @@ export function WorkerView() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <LangSwitch />
           <label className={cn("flex h-10 items-center gap-2 rounded-xl border px-3 text-sm", offline ? "border-warning/40 bg-warning/10 text-warning" : "")}>
             {offline ? <WifiOff className="size-4" /> : <Wifi className="size-4 text-success" />}
             {t("worker.offline")}
@@ -71,30 +68,14 @@ export function WorkerView() {
         </div>
       )}
 
-      <Panel title={t("worker.shift")} icon={ListChecks}>
-        <div className="flex flex-col items-center gap-5 sm:flex-row">
-          <div className="relative">
-            <LoopRing size={110} stroke={9} scores={{ waste: progress, solar: progress, rain: progress, reuse: progress, save: progress }}>
-              <div className="text-center"><p className="font-display text-2xl font-semibold">{done.length}/{mine.length}</p><p className="text-[9px] uppercase text-muted-foreground">tasks</p></div>
-            </LoopRing>
-          </div>
-          <div className="grid flex-1 grid-cols-2 gap-2 md:grid-cols-4">
-            {[
-              { i: Truck, k: "Tanker trips avoided", v: impact.tankers.toFixed(0), c: "var(--loop-save)" },
-              { i: Zap, k: "kWh moved off-peak", v: impact.kwh.toFixed(0), c: "var(--loop-solar)" },
-              { i: Droplets, k: "Litres recharged", v: impact.litres.toLocaleString("en-IN"), c: "var(--loop-rain)" },
-              { i: CheckCircle2, k: "Loop Score added", v: `+${impact.score.toFixed(1)}`, c: "var(--primary-glow)" },
-            ].map((s) => (
-              <div key={s.k} className="rounded-xl border bg-background/30 p-3">
-                <s.i className="size-4" style={{ color: s.c }} aria-hidden />
-                <p className="mt-1 font-display text-xl font-semibold tabular">{s.v}</p>
-                <p className="text-[11px] text-muted-foreground">{s.k}</p>
-              </div>
-            ))}
-          </div>
+      <div className="glass rounded-xl p-4">
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-medium">{t("worker.shift")}</span>
+          <span className="font-mono text-xs tabular">{done.length}/{mine.length} tasks</span>
         </div>
-        {impact.tankers > 0 && <p className="mt-4 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">You helped avoid {impact.tankers} tanker trip{impact.tankers > 1 ? "s" : ""} today. 🙏</p>}
-      </Panel>
+        <Meter value={progress} className="mt-2" label="Shift progress" />
+        <p className="mt-2 text-xs text-muted-foreground">Loop Score added: +{impact.score.toFixed(1)}{impact.tankers > 0 ? ` · ${impact.tankers} tanker trip${impact.tankers > 1 ? "s" : ""} avoided` : ""}</p>
+      </div>
 
       <section aria-labelledby="tasks-h">
         <h2 id="tasks-h" className="mb-3 flex items-center gap-2 text-lg font-semibold">{t("worker.tasks")} <span className="rounded-full bg-primary/15 px-2 py-0.5 font-mono text-xs text-primary-glow">{open.length}</span></h2>
@@ -105,13 +86,9 @@ export function WorkerView() {
             <AnimatePresence initial={false}>
               {open.map((x) => (
                 <motion.li key={x.id} layout initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: 40 }}>
-                  <button onClick={() => setOpenId(x.id)} className="glass group relative flex w-full flex-col gap-3 overflow-hidden rounded-2xl p-4 text-left transition hover:shadow-glow">
+                  <button onClick={() => setOpenId(x.id)} className="glass group relative flex w-full flex-col gap-3 overflow-hidden rounded-xl p-4 text-left transition-colors hover:bg-accent">
                     <span className="absolute inset-x-0 top-0 h-1" style={{ background: LOOP_BY_ID[x.loop].color }} />
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-base font-semibold leading-snug">{x.title}</p>
-                      <span className={cn("shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px]", x.priority >= 70 ? "bg-destructive/15 text-destructive" : x.priority >= 50 ? "bg-warning/15 text-warning" : "bg-muted text-muted-foreground")}>P{x.priority}</span>
-                    </div>
-                    <p className="line-clamp-2 text-xs text-muted-foreground">{x.reason}</p>
+                    <p className="text-base font-semibold leading-snug">{x.title}</p>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1"><MapPin className="size-3.5" />{x.place}</span>
                       <span className="flex items-center gap-1"><Clock className="size-3.5" />{t("worker.deadline")}: {x.deadline}</span>
@@ -133,7 +110,7 @@ export function WorkerView() {
           <h2 id="done-h" className="mb-3 text-sm font-semibold text-muted-foreground">Completed today</h2>
           <ul className="space-y-2">
             {done.map((x) => (
-              <li key={x.id} className="flex items-center gap-3 rounded-xl border bg-background/30 p-3 text-sm">
+              <li key={x.id} className="flex items-center gap-3 rounded-lg border p-3 text-sm">
                 {x.proof ? <img src={x.proof} alt={`Proof for ${x.title}`} className="size-10 rounded-lg object-cover" /> : <CheckCircle2 className="size-5 text-success" />}
                 <div className="min-w-0 flex-1"><p className="truncate font-medium">{x.title}</p><p className="text-xs text-muted-foreground">Done {x.doneAt}{x.voiceNote ? ` · voice note ${x.voiceNote}` : ""}{x.queuedOffline ? " · waiting to sync" : ""}</p></div>
                 <StatusPill status={x.status} />
@@ -193,7 +170,6 @@ function TaskDetail({ task, onClose }: { task: TaskRecord; onClose: () => void }
     toast.success("Voice note saved");
   };
 
-  const allSteps = task.checklist.every(Boolean);
   const complete = () => {
     setStatus(task.id, "done", { proof, voiceNote: rec.label, queuedOffline: offline });
     toast.success(offline ? "Saved offline" : "Task completed", { description: offline ? "Will sync when you're back online." : `Loop Score +${task.impact.score.toFixed(1)}` });
@@ -257,7 +233,7 @@ function TaskDetail({ task, onClose }: { task: TaskRecord; onClose: () => void }
               Recording 0:{String(rec.secs).padStart(2, "0")}
             </button>
           ) : rec.label ? (
-            <div className="flex h-24 flex-col items-center justify-center gap-1.5 rounded-xl border bg-background/30 text-sm">
+            <div className="flex h-24 flex-col items-center justify-center gap-1.5 rounded-xl border text-sm">
               {rec.url ? <audio src={rec.url} controls className="h-8 w-full px-2" /> : <span className="flex items-center gap-1 text-success"><Play className="size-4" /> Voice note {rec.label}</span>}
               <button onClick={() => setRec({ on: false, secs: 0 })} className="text-[11px] text-muted-foreground underline">Re-record</button>
             </div>
@@ -271,7 +247,6 @@ function TaskDetail({ task, onClose }: { task: TaskRecord; onClose: () => void }
         <Button variant="hero" size="xl" className="w-full" onClick={complete}>
           <CheckCircle2 /> {t("btn.markDone")}
         </Button>
-        {!allSteps && <p className="-mt-3 text-center text-xs text-muted-foreground">Tip: tick each step so the officer can verify faster.</p>}
       </div>
     </div>
   );

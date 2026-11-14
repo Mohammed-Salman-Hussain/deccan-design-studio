@@ -156,10 +156,10 @@ function StormPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1500px]">
-      <PageHeader eyebrow={`Storm Simulator · ${loc.name}`} title="One storm, end to end" description="Press the button and watch the Core read the forecast, flag the risks, dispatch crews, fill tanks on solar and ride through the outage.">
+    <div className="mx-auto max-w-[1300px]">
+      <PageHeader title="Storm Simulator" description="Press the button and watch the Core read the forecast, flag the risks, dispatch crews, fill tanks on solar and ride through the outage.">
         {done && <Button variant="glass" onClick={reset}><RotateCcw /> Resume normal clock</Button>}
-        <Button variant="hero" size="xl" onClick={run} disabled={running} aria-label="Run Storm Day">
+        <Button variant="hero" size="lg" onClick={run} disabled={running} aria-label="Run Storm Day">
           {done ? <RotateCcw /> : <Play />} {running ? "Storm running…" : done ? "Run it again" : "Run Storm Day"}
         </Button>
       </PageHeader>
@@ -192,7 +192,7 @@ function StormPage() {
             })}
           </ol>
           {step >= 2 && (
-            <div className="mt-2 rounded-lg border bg-muted/30 p-3 text-xs">
+            <div className="mt-2 rounded-lg bg-brand-yellow/50 p-3 text-xs">
               <p className="flex items-center gap-1.5 font-medium"><Wrench className="size-3.5 text-primary-glow" aria-hidden /> {dispatchedCount} tasks now in the Field Worker queue</p>
               <p className="mt-1 text-muted-foreground">Open the <Link to="/command" onClick={() => setRole("worker")} className="text-primary-glow underline-offset-4 hover:underline">Field Worker view</Link> to complete one and watch the Loop Score move.</p>
             </div>
@@ -200,10 +200,9 @@ function StormPage() {
         </Panel>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Stat label="Loop Score" value={<AnimatedNumber value={now.score} decimals={1} />} sub="live" color="var(--primary-glow)" />
             <Stat label="Tankers avoided" value={<AnimatedNumber value={now.tankersAvoided} decimals={1} />} sub="so far" color="var(--loop-save)" />
-            <Stat label="Recharged so far" value={fmtL(now.rechargeL)} sub="into recharge pits" color="var(--loop-rain)" />
             <Stat label="Street runoff so far" value={fmtL(now.streetL)} sub={`vs ${fmtL(now.streetBaseL)} without`} color="var(--destructive)" />
           </div>
 
