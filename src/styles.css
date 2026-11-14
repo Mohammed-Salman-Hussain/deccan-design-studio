@@ -12,8 +12,8 @@
  */
 
 @theme inline {
-  --font-display: "Sora", "Noto Sans Telugu", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Manrope", "Noto Sans Telugu", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Noto Sans Telugu", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Noto Sans Telugu", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -79,7 +79,7 @@
 }
 
 :root {
-  --radius: 0.9rem;
+  --radius: 0.65rem;
 
   /* brand */
   --ink: oklch(0.24 0.038 168.8);
@@ -277,7 +277,7 @@
   background-image:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
+  background-size: 32px 32px;
   mask-image: radial-gradient(ellipse at 50% 0%, #000 40%, transparent 80%);
 }
 
