@@ -174,7 +174,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Sheet>
 
       <AssumptionsSheet />
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster position="top-right" closeButton />
     </TooltipProvider>
   );
 }
