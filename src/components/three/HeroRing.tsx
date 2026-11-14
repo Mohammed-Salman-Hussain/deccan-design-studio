@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Line, Sparkles } from "@react-three/drei";
+import { Float, Line } from "@react-three/drei";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { LOOP_HEX, LOOP_ORDER, BRAND } from "./colors";
@@ -16,11 +16,11 @@ function Arcs() {
         <group key={k} rotation={[0, 0, i * ARC + GAP / 2]}>
           <mesh>
             <torusGeometry args={[R, 0.075, 24, 160, ARC - GAP]} />
-            <meshStandardMaterial color={LOOP_HEX[k]} emissive={LOOP_HEX[k]} emissiveIntensity={1.4} toneMapped={false} roughness={0.3} />
+            <meshStandardMaterial color={LOOP_HEX[k]} emissive={LOOP_HEX[k]} emissiveIntensity={0.3} roughness={0.35} />
           </mesh>
           <mesh>
             <torusGeometry args={[R, 0.24, 16, 120, ARC - GAP]} />
-            <meshBasicMaterial color={LOOP_HEX[k]} transparent opacity={0.09} blending={THREE.AdditiveBlending} depthWrite={false} />
+            <meshBasicMaterial color={LOOP_HEX[k]} transparent opacity={0.12} depthWrite={false} />
           </mesh>
         </group>
       ))}
@@ -107,15 +107,15 @@ function Core({ reduce }: { reduce: boolean }) {
     <group>
       <mesh ref={glow}>
         <sphereGeometry args={[0.42, 32, 32]} />
-        <meshStandardMaterial color={BRAND.amber} emissive="#e0892a" emissiveIntensity={1.6} toneMapped={false} />
+        <meshStandardMaterial color={BRAND.amber} emissive={BRAND.amber} emissiveIntensity={0.5} />
       </mesh>
       <mesh>
         <sphereGeometry args={[0.85, 32, 32]} />
-        <meshBasicMaterial color="#e0892a" transparent opacity={0.08} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial color={BRAND.amber} transparent opacity={0.14} depthWrite={false} />
       </mesh>
       <mesh ref={ico}>
         <icosahedronGeometry args={[0.72, 1]} />
-        <meshBasicMaterial color={BRAND.peach} wireframe transparent opacity={0.35} />
+        <meshBasicMaterial color={BRAND.burgundy} wireframe transparent opacity={0.45} />
       </mesh>
     </group>
   );
@@ -146,9 +146,9 @@ export default function HeroRing({ reduce = false }: { reduce?: boolean }) {
         aria-label="Animated LoopLocal ring: five loops of waste, solar, savings, reuse and rain circling a central core"
         role="img"
       >
-        <ambientLight intensity={0.4} />
-        <pointLight position={[3, 3, 4]} intensity={30} color={BRAND.peach} />
-        <pointLight position={[-4, -2, 2]} intensity={18} color="#6fd0c8" />
+        <ambientLight intensity={1.1} />
+        <pointLight position={[3, 3, 4]} intensity={30} color="#ffffff" />
+        <pointLight position={[-4, -2, 2]} intensity={14} color={BRAND.peach} />
         <Float speed={reduce ? 0 : 1.2} rotationIntensity={0.15} floatIntensity={0.5}>
           <Rig reduce={reduce}>
             <Arcs />
@@ -157,7 +157,6 @@ export default function HeroRing({ reduce = false }: { reduce?: boolean }) {
             <Core reduce={reduce} />
           </Rig>
         </Float>
-        <Sparkles count={70} scale={[9, 6, 4]} size={2.2} speed={reduce ? 0 : 0.3} color={BRAND.peach} opacity={0.5} />
       </Canvas>
     </div>
   );

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useApp } from "@/store/app";
 
 export interface MapMarker {
   id: string;
@@ -61,7 +60,6 @@ export default function LeafletMap({ center, zoom, markers = [], circles = [], o
   const layer = useRef<L.LayerGroup | null>(null);
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
-  const theme = useApp((s) => s.theme);
   const [tileError, setTileError] = useState(false);
 
   useEffect(() => {
@@ -96,8 +94,7 @@ export default function LeafletMap({ center, zoom, markers = [], circles = [], o
     const m = map.current;
     if (!m) return;
     tiles.current?.remove();
-    const style = theme === "light" ? "light_all" : "dark_all";
-    const t = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
+    const t = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: "abcd",
       maxZoom: 19,
@@ -110,7 +107,7 @@ export default function LeafletMap({ center, zoom, markers = [], circles = [], o
     t.on("tileload", () => setTileError(false));
     t.addTo(m);
     tiles.current = t;
-  }, [theme]);
+  }, []);
 
   useEffect(() => {
     map.current?.flyTo(center, zoom, { duration: 0.8 });

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export function TankGauge({ pct, label = "Overhead tank", size = 150 }: { pct: number; label?: string; size?: number }) {
   const h = size * 1.15;
   const level = Math.max(0, Math.min(100, pct));
-  const color = level < 25 ? "var(--destructive)" : level < 50 ? "var(--warning)" : "var(--loop-reuse)";
+  const color = level < 25 ? "var(--destructive)" : level < 50 ? "var(--warning)" : "var(--loop-rain)";
   const y = 12 + (h - 24) * (1 - level / 100);
   return (
     <div className="relative" style={{ width: size, height: h }} role="meter" aria-label={label} aria-valuenow={Math.round(level)} aria-valuemin={0} aria-valuemax={100}>
@@ -36,7 +36,7 @@ export function TankGauge({ pct, label = "Overhead tank", size = 150 }: { pct: n
       </svg>
       <div className="absolute inset-0 grid place-items-center">
         <div className="text-center">
-          <p className="font-display text-3xl font-semibold tabular drop-shadow">{Math.round(level)}%</p>
+          <p className="font-display text-3xl font-semibold tabular">{Math.round(level)}%</p>
           <p className="text-[10px] uppercase tracking-wider text-foreground/80">{label}</p>
         </div>
       </div>

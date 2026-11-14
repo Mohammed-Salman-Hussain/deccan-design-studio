@@ -84,11 +84,11 @@ export function Wiring() {
         bodyClass="p-2"
       >
         {view === "3d" && webgl ? (
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gradient-to-b from-surface-2/50 to-background/40">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
             <HubModel3D selected={sel} onSelect={setSel} exploded={exploded} reduce={reduce} />
           </div>
         ) : (
-          <div className="rounded-xl border bg-muted/20 p-3">
+          <div className="rounded-xl border p-3">
             {!webgl && <p className="mb-2 text-xs text-muted-foreground">3D is not available on this device, so the schematic is shown instead.</p>}
             <Schematic part={part} devices={devices} />
           </div>
@@ -98,7 +98,7 @@ export function Wiring() {
       <Panel title={PART_LABEL[part]} subtitle={`${devices.length} device${devices.length === 1 ? "" : "s"} · hub ${hub.id}`} icon={Network}>
         <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="Choose a hub part">
           {PART_ORDER.map((p) => (
-            <button key={p} onClick={() => setSel(p)} aria-pressed={part === p} className={cn("rounded-full border px-2.5 py-1 text-xs transition", part === p ? "border-primary bg-primary/15" : "hover:bg-accent/50")}>{PART_LABEL[p]}</button>
+            <button key={p} onClick={() => setSel(p)} aria-pressed={part === p} className={cn("rounded-full border px-2.5 py-1 text-xs transition", part === p ? "border-transparent bg-secondary text-secondary-foreground" : "hover:bg-accent")}>{PART_LABEL[p]}</button>
           ))}
         </div>
         <ul className="space-y-2">
@@ -118,11 +118,6 @@ export function Wiring() {
         </ul>
       </Panel>
 
-      {view === "3d" && webgl && (
-        <Panel title="Wiring diagram" subtitle={`${PART_LABEL[part]} to the edge gateway`} icon={Network} className="xl:col-span-2">
-          <Schematic part={part} devices={devices} />
-        </Panel>
-      )}
     </div>
   );
 }

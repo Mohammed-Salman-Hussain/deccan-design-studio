@@ -19,7 +19,7 @@ export function ExportReport({ open, onOpenChange }: { open: boolean; onOpenChan
   const downloadHtml = () => {
     const el = document.getElementById("ll-report");
     if (!el) return;
-    const html = `<!doctype html><html><head><meta charset="utf-8"><title>LoopLocal report — ${loc.name}</title><style>body{font-family:system-ui,sans-serif;color:#09251C;background:#fff;padding:32px;max-width:800px;margin:auto}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e5d9c8;padding:6px;text-align:left;font-size:12px}h1,h2{margin:.4em 0}.k{display:inline-block;margin:4px 12px 4px 0}</style></head><body>${el.innerHTML}</body></html>`;
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>LoopLocal report — ${loc.name}</title><style>body{font-family:system-ui,sans-serif;color:#4A0A1C;background:#fff;padding:32px;max-width:800px;margin:auto}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #BEDEFF;padding:6px;text-align:left;font-size:12px}h1,h2{margin:.4em 0}.k{display:inline-block;margin:4px 12px 4px 0}</style></head><body>${el.innerHTML}</body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -36,8 +36,8 @@ export function ExportReport({ open, onOpenChange }: { open: boolean; onOpenChan
           <DialogTitle className="font-display">Locality report preview</DialogTitle>
           <DialogDescription>Print to PDF or download a shareable copy for the zonal office.</DialogDescription>
         </DialogHeader>
-        <div className="rounded-xl bg-[var(--cream)] p-1">
-          <article id="ll-report" className="rounded-lg bg-[var(--cream)] p-6 text-[var(--ink)] md:p-8">
+        <div className="rounded-xl border bg-card p-1">
+          <article id="ll-report" className="rounded-lg bg-card p-6 text-[var(--ink)] md:p-8">
             <header className="flex items-start justify-between border-b border-[color-mix(in_oklab,var(--ink)_15%,transparent)] pb-4">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] opacity-60">LoopLocal · Daily loop report</p>
@@ -46,7 +46,7 @@ export function ExportReport({ open, onOpenChange }: { open: boolean; onOpenChan
               </div>
               <div className="text-right">
                 <p className="text-[10px] uppercase opacity-60">Loop Score</p>
-                <p className="font-display text-4xl font-semibold text-[var(--amber)]">{sum.score.toFixed(1)}</p>
+                <p className="font-display text-4xl font-semibold text-primary-glow">{sum.score.toFixed(1)}</p>
               </div>
             </header>
             <section className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">

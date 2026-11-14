@@ -14,7 +14,7 @@ interface Props {
 }
 
 /** Signature motif: five colour-coded arcs. With `scores`, each arc fills by that loop's score. */
-export function LoopRing({ size = 120, stroke = 10, scores, spin, glow = true, className, children, title = "Loop ring" }: Props) {
+export function LoopRing({ size = 120, stroke = 10, scores, spin, glow = false, className, children, title = "Loop ring" }: Props) {
   const r = (size - stroke) / 2 - 2;
   const c = 2 * Math.PI * r;
   const gap = c * 0.025;

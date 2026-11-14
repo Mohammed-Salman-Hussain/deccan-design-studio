@@ -47,18 +47,18 @@ export function ResidentView() {
   }, [scenario, outages, hub.section]);
 
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 xl:grid-cols-[1.3fr_1fr]">
-        <Panel className="overflow-hidden" title={t("resident.plan")} subtitle={`${hub.name} · ${hub.flats} flats · ${hub.area}`} icon={Sun}>
-          <motion.p key={plan.headline} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="font-display text-xl font-semibold leading-snug md:text-2xl">{plan.headline}</motion.p>
+    <div className="space-y-4">
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
+        <Panel title={t("resident.plan")} subtitle={`${hub.name} · ${hub.flats} flats · ${hub.area}`} icon={Sun}>
+          <motion.p key={plan.headline} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="font-display text-xl font-semibold leading-snug">{plan.headline}</motion.p>
           <ol className="relative mt-5 space-y-3 border-l pl-5">
             {plan.items.map((it, i) => {
               const Icon = PLAN_ICON[it.kind];
               const past = it.h <= nowH;
               return (
                 <motion.li key={i} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="relative">
-                  <span className={cn("absolute -left-[31px] grid size-5 place-items-center rounded-full border-2 border-background", past ? "" : "opacity-60")} style={{ background: PLAN_COLOR[it.kind] }}>
-                    <Icon className="size-2.5 text-background" aria-hidden />
+                  <span className={cn("absolute -left-[31px] grid size-5 place-items-center rounded-full border-2 border-card", past ? "" : "opacity-60")} style={{ background: PLAN_COLOR[it.kind] }}>
+                    <Icon className="size-2.5 text-card" aria-hidden />
                   </span>
                   <p className="font-mono text-[11px] text-muted-foreground">{formatHour(it.h)} {past && <span className="text-success">· done</span>}</p>
                   <p className="text-sm">{it.text}</p>
@@ -68,54 +68,55 @@ export function ResidentView() {
           </ol>
         </Panel>
 
-        <Panel title={t("resident.alerts")} subtitle="For your section" icon={Bell}>
+        <Panel title={t("resident.alerts")} subtitle="Notices for your electricity section and your hub." icon={Bell}>
           <ul className="space-y-2.5">
             {alerts.length === 0 && notices.length === 0 && <EmptyState icon={CheckCircle2} title="No alerts" body="Nothing needs your attention today." />}
             {alerts.map((a) => (
-              <li key={a.title} className="flex gap-3 rounded-xl border p-3" style={{ borderColor: `color-mix(in oklab, ${a.tone} 35%, transparent)`, background: `color-mix(in oklab, ${a.tone} 8%, transparent)` }}>
+              <li key={a.title} className="flex gap-3 rounded-lg border p-3" style={{ borderColor: `color-mix(in oklab, ${a.tone} 35%, transparent)`, background: `color-mix(in oklab, ${a.tone} 8%, transparent)` }}>
                 <a.icon className="mt-0.5 size-4 shrink-0" style={{ color: a.tone }} aria-hidden />
                 <div><p className="text-sm font-medium">{a.title}</p><p className="text-xs text-muted-foreground">{a.body}</p></div>
               </li>
             ))}
-            {notices.slice(0, 4).map((n) => (
-              <li key={n.id} className="flex gap-3 rounded-xl border bg-background/30 p-3">
+            {notices.slice(0, 2).map((n) => (
+              <li key={n.id} className="flex gap-3 rounded-lg border p-3">
                 <Bell className="mt-0.5 size-4 shrink-0 text-primary-glow" aria-hidden />
-                <div className="min-w-0"><p className="text-sm font-medium">{n.title}</p><p className="text-xs text-muted-foreground">{n.body}</p><p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{n.at}</p></div>
+                <div className="min-w-0"><p className="text-sm font-medium">{n.title}</p><p className="text-xs text-muted-foreground">{n.body}</p></div>
               </li>
             ))}
           </ul>
         </Panel>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[auto_1fr]">
-        <Panel title={t("kpi.tank")} subtitle={hs.now.outage ? "Power is out — tank is supplying homes" : hs.now.pumpOn ? `Pump on · ${hs.now.pumpSource}` : "Pump idle"} icon={Droplet} bodyClass="flex flex-col items-center gap-3">
+      <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
+        <Panel
+          title={t("kpi.tank")}
+          subtitle={<>{hs.now.outage ? "Power is out and the tank is supplying homes." : hs.now.pumpOn ? `Pump on, running on ${hs.now.pumpSource}.` : "Pump idle."} Outage covered: {hs.outageHours > 0 ? `${hs.outageCoveredHours.toFixed(1)} of ${hs.outageHours.toFixed(1)} h` : "no outage today"}. Shortage: {fmtL(hs.shortageL)}.</>}
+          icon={Droplet}
+          bodyClass="flex flex-col items-center gap-2"
+        >
           <TankGauge pct={hs.now.tankPct} />
-          <div className="grid w-full grid-cols-2 gap-2 text-center text-xs">
-            <div className="rounded-lg bg-muted/50 p-2"><p className="text-muted-foreground">Outage covered</p><p className="font-semibold tabular">{hs.outageHours > 0 ? `${hs.outageCoveredHours.toFixed(1)} / ${hs.outageHours.toFixed(1)} h` : "—"}</p></div>
-            <div className="rounded-lg bg-muted/50 p-2"><p className="text-muted-foreground">Shortage</p><p className="font-semibold tabular">{fmtL(hs.shortageL)}</p></div>
-          </div>
+          <p className="text-xs text-muted-foreground">{hs.now.outage ? "Power out · tank supplying" : hs.now.pumpOn ? `Pump on · ${hs.now.pumpSource}` : "Pump idle"}</p>
         </Panel>
-        <div className="grid gap-5">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat label={t("kpi.solar")} icon={Sun} color="var(--loop-solar)" value={<AnimatedNumber value={hs.now.solarKW} decimals={1} suffix=" kW" />} sub={`${hs.solarKWh.toFixed(0)} kWh today`} hint="kWp × sun angle × (1 − 0.75 × cloud cover)" />
-            <Stat label={t("kpi.biogas")} icon={Flame} color="var(--loop-waste)" value={<AnimatedNumber value={hs.wasteDivertedKg} suffix=" kg" />} sub={hub.biogasKgDay ? `${(hs.wasteDivertedKg * 0.06).toFixed(1)} m³ gas` : "No digester yet"} hint="Wet waste fed to the digester today; 0.06 m³ gas per kg." />
+        <div className="grid gap-4">
+          <div className="grid grid-cols-3 gap-3">
+            <Stat label={t("kpi.solar")} icon={Sun} color="var(--loop-solar)" value={<AnimatedNumber value={hs.now.solarKW} decimals={1} suffix=" kW" />} hint={`${hs.solarKWh.toFixed(0)} kWh today. kWp × sun angle × (1 − 0.75 × cloud cover).`} />
             <Stat label={t("kpi.savings")} icon={IndianRupee} color="var(--primary-glow)" value={<span className="tabular">{fmtRs(hs.savingsRs)}</span>} sub={`≈ ${fmtRs(hs.savingsRs / hub.flats)} per flat`} hint="Solar units × ₹8 + peak kWh avoided × ₹9.50 + tankers avoided × ₹1,000" />
-            <Stat label={t("kpi.tankers")} icon={Truck} color="var(--loop-save)" value={<AnimatedNumber value={hs.tankersAvoided} decimals={1} />} sub="5,000 L trips" hint="(extra reuse + pit top-up + 25% of recharge + shortage avoided) ÷ 5,000 L" />
+            <Stat label={t("kpi.tankers")} icon={Truck} color="var(--loop-save)" value={<AnimatedNumber value={hs.tankersAvoided} decimals={1} />} hint="5,000 L trips. (extra reuse + pit top-up + 25% of recharge + shortage avoided) ÷ 5,000 L" />
           </div>
-          <Panel title="Tank level through the day" subtitle="With LoopLocal vs the usual pump schedule" bodyClass="h-[230px]">
+          <Panel title="Tank level through the day" subtitle="With LoopLocal compared with the usual pump schedule. Shaded bands are power cuts." bodyClass="h-[220px]">
             <ResponsiveContainer>
               <AreaChart data={chart} margin={{ left: -18, right: 8, top: 6 }}>
                 <defs>
-                  <linearGradient id="gTank" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--loop-reuse)" stopOpacity={0.5} /><stop offset="1" stopColor="var(--loop-reuse)" stopOpacity={0} /></linearGradient>
-                  <linearGradient id="gSolar" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--loop-solar)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--loop-solar)" stopOpacity={0} /></linearGradient>
+                  <linearGradient id="gTank" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--loop-rain)" stopOpacity={0.4} /><stop offset="1" stopColor="var(--loop-rain)" stopOpacity={0} /></linearGradient>
+                  <linearGradient id="gSolar" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--loop-solar)" stopOpacity={0.3} /><stop offset="1" stopColor="var(--loop-solar)" stopOpacity={0} /></linearGradient>
                 </defs>
                 <CartesianGrid stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="hour" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} interval={3} />
                 <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} domain={[0, 100]} />
                 {outages.map(([a, b]) => <ReferenceArea key={a} x1={`${String(Math.floor(a)).padStart(2, "0")}:00`} x2={`${String(Math.min(23, Math.floor(b))).padStart(2, "0")}:00`} fill="var(--destructive)" fillOpacity={0.08} />)}
-                <RTooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }} />
+                <RTooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }} />
                 <Area type="monotone" dataKey="without" name="Without LoopLocal (%)" stroke="var(--muted-foreground)" strokeDasharray="4 4" fill="none" />
-                <Area type="monotone" dataKey="tank" name="Tank (%)" stroke="var(--loop-reuse)" strokeWidth={2} fill="url(#gTank)" />
+                <Area type="monotone" dataKey="tank" name="Tank (%)" stroke="var(--loop-rain)" strokeWidth={2} fill="url(#gTank)" />
                 <Area type="monotone" dataKey="solar" name="Solar (kW)" stroke="var(--loop-solar)" fill="url(#gSolar)" />
                 <ReferenceLine x={`${String(Math.floor(nowH)).padStart(2, "0")}:00`} stroke="var(--primary-glow)" strokeDasharray="3 3" label={{ value: "now", fill: "var(--primary-glow)", fontSize: 10, position: "top" }} />
               </AreaChart>
@@ -124,12 +125,18 @@ export function ResidentView() {
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-3">
-        <SegregationBoard />
-        <ReportIssue />
-        <SurplusCard />
-      </div>
-      <PaybackEstimator />
+      <Tabs defaultValue="report">
+        <TabsList>
+          <TabsTrigger value="report">Report an issue</TabsTrigger>
+          <TabsTrigger value="share">Share surplus</TabsTrigger>
+          <TabsTrigger value="waste">Waste ranking</TabsTrigger>
+          <TabsTrigger value="payback">Payback</TabsTrigger>
+        </TabsList>
+        <TabsContent value="report" className="mt-3 max-w-xl"><ReportIssue /></TabsContent>
+        <TabsContent value="share" className="mt-3 max-w-xl"><SurplusCard /></TabsContent>
+        <TabsContent value="waste" className="mt-3 max-w-xl"><SegregationBoard /></TabsContent>
+        <TabsContent value="payback" className="mt-3"><PaybackEstimator /></TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -143,7 +150,7 @@ function SegregationBoard() {
   const badge = (s: number) => (s >= 80 ? { t: "Zero-waste hero", c: "var(--loop-waste)" } : s >= 70 ? { t: "Green bin pro", c: "var(--loop-reuse)" } : s >= 60 ? { t: "Rising", c: "var(--loop-solar)" } : { t: "Getting started", c: "var(--muted-foreground)" });
   return (
     <Panel title="Waste segregation" subtitle="Neighbourhood leaderboard" icon={Trophy}>
-      <div className="mb-4 flex items-center gap-4 rounded-xl border bg-background/30 p-3">
+      <div className="mb-4 flex items-center gap-4 rounded-lg border p-3">
         <div className="grid size-14 place-items-center rounded-full border-4" style={{ borderColor: badge(mine.s).c }}>
           <span className="font-display text-lg font-semibold">{mine.s}</span>
         </div>
@@ -158,7 +165,7 @@ function SegregationBoard() {
           <li key={r.h.id} className={cn("flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs", r.h.id === hub.id && "bg-primary/10")}>
             <span className="w-4 font-mono text-muted-foreground">{i + 1}</span>
             <span className="flex-1 truncate">{r.h.name}</span>
-            {i < 3 && <Award className="size-3.5" style={{ color: ["var(--loop-solar)", "var(--peach)", "var(--loop-save)"][i] }} aria-label={`Rank ${i + 1} badge`} />}
+            {i < 3 && <Award className="size-3.5" style={{ color: ["var(--loop-solar)", "var(--loop-rain)", "var(--loop-save)"][i] }} aria-label={`Rank ${i + 1} badge`} />}
             <span className="font-mono tabular">{r.s}</span>
           </li>
         ))}
@@ -242,7 +249,7 @@ function ReportIssue() {
           <div className="space-y-1.5 pt-1">
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">My reports</p>
             {reports.slice(0, 3).map((r) => (
-              <div key={r.id} className="flex items-center gap-2 rounded-lg border bg-background/30 p-2 text-xs">
+              <div key={r.id} className="flex items-center gap-2 rounded-lg border p-2 text-xs">
                 {r.photo ? <img src={r.photo} alt="" className="size-8 rounded object-cover" /> : <div className="grid size-8 place-items-center rounded bg-muted"><MapPin className="size-3.5" /></div>}
                 <div className="min-w-0 flex-1"><p className="truncate font-medium">{r.type}</p><p className="text-muted-foreground">{r.createdAt}</p></div>
                 <span className="rounded-full bg-info/15 px-2 py-0.5 text-[10px] capitalize text-info">{r.status}</span>
@@ -270,7 +277,7 @@ function SurplusCard() {
     <Panel title="Surplus sharing" subtitle="Hubs share extra treated water, biogas or solar" icon={Share2}>
       <ul className="space-y-2">
         {offers.slice(0, 5).map((o) => (
-          <li key={o.id} className="flex items-center gap-2 rounded-lg border bg-background/30 p-2.5 text-xs">
+          <li key={o.id} className="flex items-center gap-2 rounded-lg border p-2.5 text-xs">
             <span className="size-2 shrink-0 rounded-full" style={{ background: color[o.resource] }} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{o.kind === "offer" ? "Offer" : "Request"} · {o.qty} {o.unit}</p>
@@ -348,7 +355,7 @@ function PaybackEstimator() {
   const Out = ({ items }: { items: [string, string][] }) => (
     <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
       {items.map(([k, v]) => (
-        <div key={k} className="rounded-xl border bg-background/30 p-3">
+        <div key={k} className="rounded-lg border p-3">
           <p className="text-[11px] text-muted-foreground">{k}</p>
           <p className="font-display text-lg font-semibold tabular">{v}</p>
         </div>

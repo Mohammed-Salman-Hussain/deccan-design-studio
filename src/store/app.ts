@@ -49,7 +49,6 @@ interface State {
   hydrated: boolean;
   role: Role;
   lang: Lang;
-  theme: "dark" | "light";
   reduceMotion: boolean;
   localityId: string;
   hubId: string;
@@ -117,7 +116,6 @@ const initial = {
   hydrated: false,
   role: "officer" as Role,
   lang: "en" as Lang,
-  theme: "dark" as const,
   reduceMotion: false,
   localityId: "kukatpally",
   hubId: "H-SSR",
@@ -230,7 +228,7 @@ export const useApp = create<State>()(
         if (n) get().log("Field app", `Synced ${n} offline completion${n > 1 ? "s" : ""}`);
       },
       resetDemo: () => {
-        set({ ...initial, hydrated: true, theme: get().theme, lang: get().lang, tasks: seedTasks("kukatpally") });
+        set({ ...initial, hydrated: true, lang: get().lang, tasks: seedTasks("kukatpally") });
       },
     }),
     {
@@ -238,7 +236,7 @@ export const useApp = create<State>()(
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => ({
-        role: s.role, lang: s.lang, theme: s.theme, reduceMotion: s.reduceMotion, localityId: s.localityId, hubId: s.hubId,
+        role: s.role, lang: s.lang, reduceMotion: s.reduceMotion, localityId: s.localityId, hubId: s.hubId,
         scenario: s.scenario, speed: s.speed, tasks: s.tasks, citizenActions: s.citizenActions, notices: s.notices,
         audit: s.audit, reports: s.reports, offers: s.offers, checks: s.checks, offline: s.offline,
       }),

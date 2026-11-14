@@ -31,16 +31,16 @@ function useWindowTexture(seed: number) {
     c.width = 256;
     c.height = 512;
     const g = c.getContext("2d")!;
-    g.fillStyle = "#e9dcc9";
+    g.fillStyle = "#EEF5FF";
     g.fillRect(0, 0, 256, 512);
-    g.fillStyle = "#d8c6ad";
+    g.fillStyle = "#C9DDF5";
     for (let y = 0; y < 512; y += 46) g.fillRect(0, y + 38, 256, 6);
     let s = seed;
     const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
     for (let y = 8; y < 500; y += 46) {
       for (let x = 12; x < 250; x += 40) {
         const lit = rnd() > 0.55;
-        g.fillStyle = lit ? "#f6c46b" : "#28463d";
+        g.fillStyle = lit ? "#FFF2A7" : "#6F95C4";
         g.fillRect(x, y, 26, 26);
         g.fillStyle = "rgba(0,0,0,0.15)";
         g.fillRect(x, y + 22, 26, 4);
@@ -58,17 +58,17 @@ function useGroundTexture() {
     const c = document.createElement("canvas");
     c.width = c.height = 512;
     const g = c.getContext("2d")!;
-    g.fillStyle = "#16362b";
+    g.fillStyle = "#DCEBFA";
     g.fillRect(0, 0, 512, 512);
-    g.strokeStyle = "rgba(243,210,175,0.07)";
+    g.strokeStyle = "rgba(147,0,49,0.06)";
     g.lineWidth = 1;
     for (let i = 0; i <= 512; i += 32) {
       g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 512); g.stroke();
       g.beginPath(); g.moveTo(0, i); g.lineTo(512, i); g.stroke();
     }
-    g.fillStyle = "rgba(243,210,175,0.08)";
+    g.fillStyle = "rgba(147,0,49,0.07)";
     g.fillRect(0, 380, 512, 40);
-    g.fillStyle = "rgba(243,210,175,0.18)";
+    g.fillStyle = "rgba(147,0,49,0.18)";
     for (let x = 0; x < 512; x += 40) g.fillRect(x, 398, 20, 3);
     const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
@@ -159,7 +159,7 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
   const ground = useGroundTexture();
   const P = { selected, hovered, setHovered, onSelect };
   const lift = exploded ? 2.6 : 0;
-  const water = "#6fd0c8";
+  const water = "#4F9BE0";
 
   return (
     <group>
@@ -178,8 +178,8 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
         <boxGeometry args={[4, 9, 4]} />
         <meshStandardMaterial map={winB} roughness={0.8} />
       </mesh>
-      <mesh position={[-4, 7.05, -2]}><boxGeometry args={[4.2, 0.12, 4.2]} /><meshStandardMaterial color="#cdb796" /></mesh>
-      <mesh position={[1, 9.05, -3]}><boxGeometry args={[4.2, 0.12, 4.2]} /><meshStandardMaterial color="#cdb796" /></mesh>
+      <mesh position={[-4, 7.05, -2]}><boxGeometry args={[4.2, 0.12, 4.2]} /><meshStandardMaterial color="#B9CFE8" /></mesh>
+      <mesh position={[1, 9.05, -3]}><boxGeometry args={[4.2, 0.12, 4.2]} /><meshStandardMaterial color="#B9CFE8" /></mesh>
 
       {/* Solar on tower B roof */}
       <Lifted by={lift}>
@@ -188,7 +188,7 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
             Array.from({ length: 3 }).map((__, c) => (
               <mesh key={`${r}-${c}`} position={[-1.2 + c * 1.2, 0.25, -1.4 + r * 0.95]} rotation={[-0.35, 0, 0]} castShadow>
                 <boxGeometry args={[1.05, 0.06, 0.75]} />
-                <meshStandardMaterial {...hl(selected === "solar" || hovered === "solar", "#22404f")} metalness={0.6} roughness={0.25} />
+                <meshStandardMaterial {...hl(selected === "solar" || hovered === "solar", "#2B4A7A")} metalness={0.6} roughness={0.25} />
               </mesh>
             )),
           )}
@@ -199,7 +199,7 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
             <cylinderGeometry args={[0.9, 0.9, 1.3, 32]} />
             <meshStandardMaterial {...hl(selected === "oht" || hovered === "oht", BRAND.cream)} roughness={0.5} />
           </mesh>
-          <mesh position={[0, 0.7, 0]}><cylinderGeometry args={[0.95, 0.95, 0.08, 32]} /><meshStandardMaterial color="#b9a284" /></mesh>
+          <mesh position={[0, 0.7, 0]}><cylinderGeometry args={[0.95, 0.95, 0.08, 32]} /><meshStandardMaterial color="#B9CFE8" /></mesh>
         </Part>
       </Lifted>
 
@@ -215,13 +215,13 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
       <Part id="pump" {...P} position={[-4.6, 0.65, 3]} labelY={1.6}>
         <mesh castShadow receiveShadow>
           <boxGeometry args={[1.8, 1.3, 1.4]} />
-          <meshStandardMaterial {...hl(selected === "pump" || hovered === "pump", "#b98a5a")} roughness={0.7} />
+          <meshStandardMaterial {...hl(selected === "pump" || hovered === "pump", "#FFA500")} roughness={0.7} />
         </mesh>
-        <mesh position={[0.95, -0.3, 0]}><cylinderGeometry args={[0.22, 0.22, 0.6, 16]} /><meshStandardMaterial color="#3a5a50" metalness={0.5} /></mesh>
+        <mesh position={[0.95, -0.3, 0]}><cylinderGeometry args={[0.22, 0.22, 0.6, 16]} /><meshStandardMaterial color="#4A6F9E" metalness={0.5} /></mesh>
       </Part>
       <Part id="gateway" {...P} position={[-4.1, 1.55, 3.3]} labelY={1.2}>
-        <mesh castShadow><boxGeometry args={[0.5, 0.3, 0.35]} /><meshStandardMaterial {...hl(selected === "gateway" || hovered === "gateway", "#f3d2af")} /></mesh>
-        <mesh position={[0.15, 0.45, 0]}><cylinderGeometry args={[0.025, 0.025, 0.7, 8]} /><meshStandardMaterial color="#dddddd" /></mesh>
+        <mesh castShadow><boxGeometry args={[0.5, 0.3, 0.35]} /><meshStandardMaterial {...hl(selected === "gateway" || hovered === "gateway", "#FFF2A7")} /></mesh>
+        <mesh position={[0.15, 0.45, 0]}><cylinderGeometry args={[0.025, 0.025, 0.7, 8]} /><meshStandardMaterial color="#ffffff" /></mesh>
         <mesh position={[0.15, 0.82, 0]}><sphereGeometry args={[0.06, 12, 12]} /><meshBasicMaterial color={BRAND.amber} toneMapped={false} /></mesh>
       </Part>
 
@@ -230,7 +230,7 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
         <Part id="sump" {...P} position={[-1.6, 0.18, 3]} labelY={1.1}>
           <mesh receiveShadow>
             <boxGeometry args={[2.6, 0.36, 1.8]} />
-            <meshStandardMaterial {...hl(selected === "sump" || hovered === "sump", "#7f8f86")} roughness={0.9} />
+            <meshStandardMaterial {...hl(selected === "sump" || hovered === "sump", "#8AA4C4")} roughness={0.9} />
           </mesh>
           <mesh position={[0, 0.19, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[2.3, 1.5]} />
@@ -241,7 +241,7 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
 
       {/* Biogas */}
       <Part id="biogas" {...P} position={[4.2, 0, 3]} labelY={2.4}>
-        <mesh position={[0, 0.35, 0]} castShadow><cylinderGeometry args={[1.1, 1.1, 0.7, 32]} /><meshStandardMaterial color="#5f7d5a" roughness={0.8} /></mesh>
+        <mesh position={[0, 0.35, 0]} castShadow><cylinderGeometry args={[1.1, 1.1, 0.7, 32]} /><meshStandardMaterial color="#C9A400" roughness={0.8} /></mesh>
         <mesh position={[0, 0.7, 0]} castShadow>
           <sphereGeometry args={[1.1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
           <meshStandardMaterial {...hl(selected === "biogas" || hovered === "biogas", LOOP_HEX.waste)} roughness={0.5} />
@@ -252,29 +252,29 @@ function Scene({ selected, onSelect, exploded, reduce }: Props) {
       <Part id="stp" {...P} position={[6.6, 0, -1]} labelY={1.9}>
         {[-1, 1].map((z) => (
           <group key={z} position={[0, 0.5, z]}>
-            <mesh castShadow receiveShadow><boxGeometry args={[1.8, 1, 1.6]} /><meshStandardMaterial {...hl(selected === "stp" || hovered === "stp", "#9aa89f")} roughness={0.8} /></mesh>
+            <mesh castShadow receiveShadow><boxGeometry args={[1.8, 1, 1.6]} /><meshStandardMaterial {...hl(selected === "stp" || hovered === "stp", "#9FB9D6")} roughness={0.8} /></mesh>
             <mesh position={[0, 0.51, 0]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[1.6, 1.4]} /><meshStandardMaterial color={water} emissive={water} emissiveIntensity={0.3} /></mesh>
           </group>
         ))}
-        <mesh position={[-1.4, 0.35, 0]} castShadow><boxGeometry args={[0.6, 0.7, 0.8]} /><meshStandardMaterial color="#c8b08f" /></mesh>
+        <mesh position={[-1.4, 0.35, 0]} castShadow><boxGeometry args={[0.6, 0.7, 0.8]} /><meshStandardMaterial color="#C9DDF5" /></mesh>
       </Part>
 
       {/* Recharge pit */}
       <Part id="pit" {...P} position={[1.2, 0.05, 6]} labelY={1.1}>
-        <mesh><cylinderGeometry args={[0.85, 0.85, 0.12, 32]} /><meshStandardMaterial {...hl(selected === "pit" || hovered === "pit", "#8a8f7e")} /></mesh>
-        <mesh position={[0, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0]}><circleGeometry args={[0.7, 32]} /><meshStandardMaterial color="#0d1f19" /></mesh>
+        <mesh><cylinderGeometry args={[0.85, 0.85, 0.12, 32]} /><meshStandardMaterial {...hl(selected === "pit" || hovered === "pit", "#9FB9D6")} /></mesh>
+        <mesh position={[0, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0]}><circleGeometry args={[0.7, 32]} /><meshStandardMaterial color="#E3EEFB" /></mesh>
         {Array.from({ length: 6 }).map((_, i) => (
-          <mesh key={i} position={[-0.55 + i * 0.22, 0.09, 0]}><boxGeometry args={[0.05, 0.03, 1.3]} /><meshStandardMaterial color="#c9c3b5" metalness={0.6} /></mesh>
+          <mesh key={i} position={[-0.55 + i * 0.22, 0.09, 0]}><boxGeometry args={[0.05, 0.03, 1.3]} /><meshStandardMaterial color="#C9DDF5" metalness={0.6} /></mesh>
         ))}
       </Part>
 
       {/* Garden */}
       <Part id="garden" {...P} position={[-6.2, 0.02, 6.2]} labelY={2.2}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[3.6, 2.6]} /><meshStandardMaterial {...hl(selected === "garden" || hovered === "garden", "#3f6b3e")} /></mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[3.6, 2.6]} /><meshStandardMaterial {...hl(selected === "garden" || hovered === "garden", "#B8960A")} /></mesh>
         {[[-1, -0.5], [0.6, 0.4], [1.2, -0.7]].map(([x, z], i) => (
           <group key={i} position={[x, 0, z]}>
-            <mesh position={[0, 0.35, 0]}><cylinderGeometry args={[0.07, 0.09, 0.7, 8]} /><meshStandardMaterial color="#6b4a2b" /></mesh>
-            <mesh position={[0, 1.0, 0]} castShadow><icosahedronGeometry args={[0.55, 0]} /><meshStandardMaterial color="#5d9a5a" flatShading /></mesh>
+            <mesh position={[0, 0.35, 0]}><cylinderGeometry args={[0.07, 0.09, 0.7, 8]} /><meshStandardMaterial color="#7A3A2A" /></mesh>
+            <mesh position={[0, 1.0, 0]} castShadow><icosahedronGeometry args={[0.55, 0]} /><meshStandardMaterial color="#E5C100" flatShading /></mesh>
           </group>
         ))}
       </Part>
@@ -304,12 +304,12 @@ export default function HubModel(props: Props) {
         onCreated={() => requestAnimationFrame(() => setReady(true))}
         onPointerMissed={() => (document.body.style.cursor = "")}
       >
-        <hemisphereLight args={["#fff1dd", "#0d2a20", 0.7]} />
-        <directionalLight position={[10, 16, 8]} intensity={2.2} color="#ffe2b8" castShadow shadow-mapSize={[1024, 1024]} shadow-camera-left={-16} shadow-camera-right={16} shadow-camera-top={16} shadow-camera-bottom={-16} />
+        <hemisphereLight args={["#ffffff", "#BEDEFF", 0.7]} />
+        <directionalLight position={[10, 16, 8]} intensity={2.2} color="#fff6dd" castShadow shadow-mapSize={[1024, 1024]} shadow-camera-left={-16} shadow-camera-right={16} shadow-camera-top={16} shadow-camera-bottom={-16} />
         <Environment resolution={128}>
           <Lightformer intensity={2} position={[0, 6, 0]} scale={[12, 12, 1]} rotation-x={Math.PI / 2} />
-          <Lightformer intensity={1} color="#f3d2af" position={[-6, 2, -2]} rotation-y={Math.PI / 2} scale={[20, 2, 1]} />
-          <Lightformer intensity={0.8} color="#6fd0c8" position={[6, 2, 2]} rotation-y={-Math.PI / 2} scale={[20, 2, 1]} />
+          <Lightformer intensity={1} color="#FFF2A7" position={[-6, 2, -2]} rotation-y={Math.PI / 2} scale={[20, 2, 1]} />
+          <Lightformer intensity={0.8} color="#4F9BE0" position={[6, 2, 2]} rotation-y={-Math.PI / 2} scale={[20, 2, 1]} />
         </Environment>
         <Scene {...props} />
         <ContactShadows position={[0, 0.01, 0]} opacity={0.4} scale={30} blur={2.5} far={10} />

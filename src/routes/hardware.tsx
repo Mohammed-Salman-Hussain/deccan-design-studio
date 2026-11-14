@@ -23,26 +23,30 @@ export const Route = createFileRoute("/hardware")({
 });
 
 const TABS = [
-  { v: "architecture", label: "Architecture", icon: Cpu },
+  { v: "architecture", label: "How it connects", icon: Cpu },
   { v: "sensors", label: "Sensors", icon: Radar },
   { v: "wiring", label: "Hub wiring", icon: Boxes },
-  { v: "data", label: "Data & alerts", icon: Network },
-  { v: "nohw", label: "No hardware", icon: PlugZap },
+  { v: "data", label: "Data and alerts", icon: Network },
+  { v: "setup", label: "Set up", icon: ClipboardCheck },
+  { v: "guide", label: "Help", icon: GraduationCap },
+] as const;
+
+const SETUP = [
+  { v: "nohw", label: "Without new hardware", icon: PlugZap },
   { v: "checklists", label: "Checklists", icon: ClipboardCheck },
   { v: "rollout", label: "Rollout", icon: Milestone },
   { v: "sizer", label: "Hub sizer", icon: Calculator },
-  { v: "guide", label: "Guide", icon: GraduationCap },
 ] as const;
 
 function HardwarePage() {
   return (
-    <div className="mx-auto max-w-[1500px]">
-      <PageHeader eyebrow="Hardware & Integration" title="How LoopLocal connects to the real world" description="The Round 1 prototype runs on simulated data; this is the integration plan." />
+    <div className="mx-auto max-w-[1300px]">
+      <PageHeader title="Hardware and integration plan" description="How LoopLocal connects to the real world. The Round 1 prototype runs on simulated data; this is the integration plan for the production layer." />
       <Tabs defaultValue="architecture" className="w-full">
-        <div className="-mx-1 mb-4 overflow-x-auto px-1 no-scrollbar">
-          <TabsList className="h-auto w-max gap-1 bg-muted/50 p-1">
+        <div className="-mx-1 mb-3 overflow-x-auto px-1 no-scrollbar">
+          <TabsList className="h-auto w-max gap-1 p-1">
             {TABS.map((t) => (
-              <TabsTrigger key={t.v} value={t.v} className="gap-1.5 px-3 py-1.5 text-xs">
+              <TabsTrigger key={t.v} value={t.v} className="gap-1.5 px-3 py-1.5 text-sm">
                 <t.icon className="size-3.5" aria-hidden /> {t.label}
               </TabsTrigger>
             ))}
@@ -52,10 +56,23 @@ function HardwarePage() {
         <TabsContent value="sensors"><SensorCatalog /></TabsContent>
         <TabsContent value="wiring"><Wiring /></TabsContent>
         <TabsContent value="data"><DataFlow /></TabsContent>
-        <TabsContent value="nohw"><NoHardware /></TabsContent>
-        <TabsContent value="checklists"><Checklists /></TabsContent>
-        <TabsContent value="rollout"><Rollout /></TabsContent>
-        <TabsContent value="sizer"><Sizer /></TabsContent>
+        <TabsContent value="setup">
+          <Tabs defaultValue="nohw">
+            <div className="-mx-1 mb-3 overflow-x-auto px-1 no-scrollbar">
+              <TabsList className="h-auto w-max gap-1 p-1">
+                {SETUP.map((t) => (
+                  <TabsTrigger key={t.v} value={t.v} className="gap-1.5 px-3 py-1.5 text-sm">
+                    <t.icon className="size-3.5" aria-hidden /> {t.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            <TabsContent value="nohw"><NoHardware /></TabsContent>
+            <TabsContent value="checklists"><Checklists /></TabsContent>
+            <TabsContent value="rollout"><Rollout /></TabsContent>
+            <TabsContent value="sizer"><Sizer /></TabsContent>
+          </Tabs>
+        </TabsContent>
         <TabsContent value="guide"><Guide /></TabsContent>
       </Tabs>
     </div>
