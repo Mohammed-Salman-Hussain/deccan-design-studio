@@ -15,7 +15,7 @@ interface TourStep {
 const STEPS: TourStep[] = [
   { to: "/", title: "Welcome to LoopLocal", body: "One engine reads a colony's water, power, waste and drains together, then turns what it finds into a short list of actions. This tour takes about a minute." },
   { to: "/command", title: "Command: decide and send", body: "Officers see ranked actions, each with a place, a reason and a deadline. Use the buttons at the top to see the same day as a resident or a field worker." },
-  { to: "/loophub", title: "LoopHub: one building block", body: "A hub is one apartment complex or colony block. This page follows its tank, solar, treated water and recharge pits through the day." },
+  { to: "/loophub", title: "LoopHub: one building block", body: "A hub is one apartment complex or colony block. This page follows its tank, solar, treated water and recharge pits through the day. Switch to Loops to see how the five loops feed each other." },
   { to: "/storm", title: "Storm: the stress test", body: "Run a storm day end to end: forecast, flagged drains, crews dispatched, tanks filled on solar and the power cut ridden through." },
   { to: "/impact", title: "Impact: what changed", body: "Switch between With and Without LoopLocal to compare the same day. Detailed adds secondary numbers, and every ⓘ explains how a figure is worked out." },
 ];

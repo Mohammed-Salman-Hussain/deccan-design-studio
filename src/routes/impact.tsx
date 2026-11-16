@@ -12,6 +12,8 @@ import { InfoTip, Meter, PageHeader, Panel, Stat, Term } from "@/components/ll/p
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Evidence } from "@/components/platform/Evidence";
 import { PolicySandbox } from "@/components/impact/PolicySandbox";
+import { Replicate } from "@/components/impact/Replicate";
+import { Sdg9 } from "@/components/impact/Sdg9";
 import { LensSwitch } from "@/components/ll/LensSwitch";
 
 export const Route = createFileRoute("/impact")({
@@ -40,10 +42,10 @@ function ImpactPage() {
   const hubBars = useMemo(() => sum.hubs.map((h) => ({ name: h.hub.name.length > 16 ? `${h.hub.name.slice(0, 15)}…` : h.hub.name, diverted: Math.round(lens === "without" ? h.base.wasteDivertedKg : h.wasteDivertedKg), generated: Math.round(h.wasteGeneratedKg) })), [sum, lens]);
 
   const sdgs = [
-    { n: 6, title: "Clean water and sanitation", bg: "var(--loop-rain)", fg: "#ffffff", stat: `${fmtL(sum.rechargeL + sum.reuseL)} recharged or reused` },
-    { n: 7, title: "Affordable and clean energy", bg: "var(--brand-orange)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.solarKWh).toLocaleString("en-IN")} kWh from solar` },
-    { n: 9, title: "Industry, innovation and infrastructure", bg: "var(--brand-burgundy)", fg: "#ffffff", stat: `${loc.hubs.length} hubs coordinated by one engine` },
-    { n: 11, title: "Sustainable cities and communities", bg: "var(--brand-yellow)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.wasteDivertedKg).toLocaleString("en-IN")} kg wet waste kept out of drains` },
+    { n: 6, targets: ["6.3", "6.4"], title: "Clean water and sanitation", bg: "var(--loop-rain)", fg: "#ffffff", stat: `${fmtL(sum.rechargeL + sum.reuseL)} recharged or reused` },
+    { n: 7, targets: ["7.2", "7.3"], title: "Affordable and clean energy", bg: "var(--brand-orange)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.solarKWh).toLocaleString("en-IN")} kWh from solar` },
+    { n: 9, targets: ["9.1", "9.4"], title: "Industry, innovation and infrastructure", bg: "var(--brand-burgundy)", fg: "#ffffff", stat: `${loc.hubs.length} hubs coordinated by one engine` },
+    { n: 11, targets: ["11.5", "11.6"], title: "Sustainable cities and communities", bg: "var(--brand-yellow)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.wasteDivertedKg).toLocaleString("en-IN")} kg wet waste kept out of drains` },
   ];
 
   return (
@@ -57,6 +59,8 @@ function ImpactPage() {
         <TabsList className="mb-3">
           <TabsTrigger value="today">Today</TabsTrigger>
           <TabsTrigger value="whatif">What if</TabsTrigger>
+          <TabsTrigger value="replicate">Replicate</TabsTrigger>
+          <TabsTrigger value="sdg9">SDG 9</TabsTrigger>
           <TabsTrigger value="evidence">Evidence</TabsTrigger>
         </TabsList>
 
@@ -155,7 +159,7 @@ function ImpactPage() {
             {sdgs.map((g) => (
               <li key={g.n} className="glass flex items-center gap-3 rounded-xl p-3">
                 <span className="grid size-10 shrink-0 place-items-center rounded-lg font-display text-lg font-bold" style={{ background: g.bg, color: g.fg }} aria-hidden>{g.n}</span>
-                <p className="min-w-0 flex-1 text-sm font-medium leading-tight">SDG {g.n}</p>
+                <p className="min-w-0 flex-1 text-sm font-medium leading-tight">SDG {g.n}<span className="block font-mono text-[10px] font-normal text-muted-foreground">targets {g.targets.join(" · ")}</span></p>
                 <InfoTip label={`About SDG ${g.n}`}><p className="mb-1 font-medium text-foreground">{g.title}</p>{g.stat}</InfoTip>
               </li>
             ))}
@@ -164,6 +168,8 @@ function ImpactPage() {
         </TabsContent>
 
         <TabsContent value="whatif"><PolicySandbox key={loc.id} /></TabsContent>
+        <TabsContent value="replicate"><Replicate /></TabsContent>
+        <TabsContent value="sdg9"><Sdg9 /></TabsContent>
         <TabsContent value="evidence"><Evidence /></TabsContent>
       </Tabs>
     </div>

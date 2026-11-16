@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useState } from "react";
-import { Sun, CloudRain, Zap, Gauge, Building2 } from "lucide-react";
+import { Sun, CloudRain, Zap, Gauge, Building2, Network } from "lucide-react";
+import { LoopsGraph } from "@/components/loops/LoopsGraph";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/app";
 import { fmtL, useHub, useHubSummary, useStepClock } from "@/lib/hooks";
@@ -54,6 +55,7 @@ function HubTwinPage() {
   const set = useApp((s) => s.set);
   const setScenario = useApp((s) => s.setScenario);
   const [withLoop, setWithLoop] = useState(true);
+  const [view, setView] = useState<"hub" | "loops">("hub");
 
   const idx = Math.min(STEPS, Math.floor(clock / STEP_MIN));
   const loopPts = useMemo(() => simulateHubDay(hub, scenario, true), [hub, scenario]);
@@ -92,13 +94,25 @@ function HubTwinPage() {
 
   return (
     <div className="mx-auto max-w-[1500px]">
-      <PageHeader title="LoopHub" description={`A day in the life of ${hub.name} (${hub.flats} flats). Drag the timeline or jump to a moment. Flows, tank level and the outage state update with the hub's own numbers.`}>
-        <div className="inline-flex rounded-lg border p-0.5" role="group" aria-label="Compare with and without LoopLocal">
-          <Button size="sm" variant={withLoop ? "soft" : "ghost"} aria-pressed={withLoop} onClick={() => setWithLoop(true)}>With LoopLocal</Button>
-          <Button size="sm" variant={!withLoop ? "soft" : "ghost"} aria-pressed={!withLoop} onClick={() => setWithLoop(false)}>Without</Button>
+      <PageHeader
+        title="LoopHub"
+        description={view === "hub" ? `A day in the life of ${hub.name} (${hub.flats} flats). Drag the timeline or jump to a moment. Flows, tank level and the outage state update with the hub's own numbers.` : "How waste, sun, rain, used water and saved water feed each other across the locality. Switch back to Hub for one building's day."}
+      >
+        <div className="inline-flex rounded-lg border p-0.5" role="group" aria-label="Choose a view">
+          <Button size="sm" variant={view === "hub" ? "soft" : "ghost"} aria-pressed={view === "hub"} onClick={() => setView("hub")}><Building2 /> Hub</Button>
+          <Button size="sm" variant={view === "loops" ? "soft" : "ghost"} aria-pressed={view === "loops"} onClick={() => setView("loops")}><Network /> Loops</Button>
         </div>
+        {view === "hub" && (
+          <div className="inline-flex rounded-lg border p-0.5" role="group" aria-label="Compare with and without LoopLocal">
+            <Button size="sm" variant={withLoop ? "soft" : "ghost"} aria-pressed={withLoop} onClick={() => setWithLoop(true)}>With LoopLocal</Button>
+            <Button size="sm" variant={!withLoop ? "soft" : "ghost"} aria-pressed={!withLoop} onClick={() => setWithLoop(false)}>Without</Button>
+          </div>
+        )}
       </PageHeader>
 
+      {view === "loops" ? (
+        <LoopsGraph />
+      ) : (
       <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
         <Panel bodyClass="p-2">
           <div className="relative overflow-hidden rounded-xl">
@@ -245,6 +259,7 @@ function HubTwinPage() {
           </Panel>
         </div>
       </div>
+      )}
     </div>
   );
 }
