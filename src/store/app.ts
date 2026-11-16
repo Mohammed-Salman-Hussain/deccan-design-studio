@@ -50,6 +50,10 @@ interface State {
   role: Role;
   lang: Lang;
   reduceMotion: boolean;
+  /** Detailed view shows secondary numbers and notes; Simple keeps the headline ones. */
+  detailed: boolean;
+  /** With LoopLocal, or the same day with no coordination. Not saved between visits. */
+  lens: "with" | "without";
   localityId: string;
   hubId: string;
   scenario: Scenario;
@@ -117,6 +121,8 @@ const initial = {
   role: "officer" as Role,
   lang: "en" as Lang,
   reduceMotion: false,
+  detailed: false,
+  lens: "with" as "with" | "without",
   localityId: "kukatpally",
   hubId: "H-SSR",
   scenario: "normal" as Scenario,
@@ -236,7 +242,7 @@ export const useApp = create<State>()(
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => ({
-        role: s.role, lang: s.lang, reduceMotion: s.reduceMotion, localityId: s.localityId, hubId: s.hubId,
+        role: s.role, lang: s.lang, reduceMotion: s.reduceMotion, detailed: s.detailed, localityId: s.localityId, hubId: s.hubId,
         scenario: s.scenario, speed: s.speed, tasks: s.tasks, citizenActions: s.citizenActions, notices: s.notices,
         audit: s.audit, reports: s.reports, offers: s.offers, checks: s.checks, offline: s.offline,
       }),

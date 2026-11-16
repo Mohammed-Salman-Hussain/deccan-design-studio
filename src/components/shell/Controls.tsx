@@ -126,6 +126,21 @@ export function RoleSwitch({ className, compact }: { className?: string; compact
   );
 }
 
+/** Simple keeps headline numbers; Detailed adds the secondary ones and short explanations. */
+export function DetailSwitch({ className }: { className?: string }) {
+  const detailed = useApp((s) => s.detailed);
+  const set = useApp((s) => s.set);
+  return (
+    <div role="radiogroup" aria-label="Detail level" className={cn("flex items-center gap-0.5 rounded-lg border bg-card p-0.5", className)}>
+      {([[false, "Simple"], [true, "Detailed"]] as const).map(([v, label]) => (
+        <button key={label} role="radio" aria-checked={detailed === v} onClick={() => set({ detailed: v })} className={cn("h-8 flex-1 whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors", detailed === v ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:text-foreground")}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function LangSwitch() {
   const lang = useApp((s) => s.lang);
   const set = useApp((s) => s.set);
@@ -188,6 +203,10 @@ export function IconButtons() {
           </button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64 space-y-3 p-3">
+          <div>
+            <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Detail level</p>
+            <DetailSwitch />
+          </div>
           <div>
             <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Language</p>
             <LangSwitch />
