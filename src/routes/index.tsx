@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { ArrowRight, CloudRain, Clock, Droplets, Gauge, ListChecks, Send, Zap } from "lucide-react";
+import { ArrowRight, Play, CloudRain, Clock, Droplets, Gauge, ListChecks, Send, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { HeroRing3D } from "@/components/ll/ClientCanvas";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { AnimatedNumber } from "@/components/ll/AnimatedNumber";
 import { formatClock, weatherAt } from "@/lib/sim/engine";
 import { LOOPS, LOOP_BY_ID } from "@/lib/sim/loops";
 import { useApp } from "@/store/app";
+import { useGuide } from "@/store/guide";
 import { useActionQueue, useLensedSummary, useLocality } from "@/lib/hooks";
 
 export const Route = createFileRoute("/")({
@@ -48,6 +49,7 @@ function Landing() {
   const lens = useApp((s) => s.lens);
   const detailed = useApp((s) => s.detailed);
   const queue = useActionQueue();
+  const startDemo = useGuide((s) => s.startDemo);
   const w = weatherAt(scenario, clock / 60);
   const pending = queue.filter((q) => q.status === "pending").sort((a, b) => b.priority - a.priority);
   const next = pending.slice(0, 4);
@@ -67,6 +69,7 @@ function Landing() {
         }
       >
         <div className="flex flex-wrap items-center gap-2">
+          <Button variant="glass" size="sm" onClick={startDemo}><Play /> Watch the 2-minute demo</Button>
           <LensSwitch />
           <Readout icon={Clock} label="Time" value={formatClock(clock)} />
           <Readout icon={CloudRain} label="Weather" value={w.rainMm > 0.5 ? `Rain ${w.rainMm.toFixed(0)} mm/h` : `${w.temp.toFixed(0)} °C`} />

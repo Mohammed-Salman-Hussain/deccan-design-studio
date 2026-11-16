@@ -6,6 +6,7 @@ import { CheckCircle2, ChevronLeft, Clock, ChevronRight, CloudLightning, CloudRa
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useApp } from "@/store/app";
+import { useGuide } from "@/store/guide";
 import { fmtL, useLocality } from "@/lib/hooks";
 import { generateActions } from "@/lib/sim/actions";
 import { formatClock, localityHourly, summarizeLocality, weatherAt } from "@/lib/sim/engine";
@@ -143,6 +144,15 @@ function StormPage() {
     reached.current = -1;
     set({ clock: 630, playing: true });
   };
+  // The demo bumps this counter to start the day. Ignore the value already there when the page opens.
+  const stormRun = useGuide((s) => s.stormRun);
+  const seenRun = useRef(stormRun);
+  useEffect(() => {
+    if (stormRun === seenRun.current) return;
+    seenRun.current = stormRun;
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stormRun]);
   const manual = (i: number) => {
     if (scenario !== "storm") setScenario("storm");
     setRunning(false);
