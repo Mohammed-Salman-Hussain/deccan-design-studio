@@ -33,8 +33,8 @@ const WHY = [
 
 const TRY = [
   { to: "/storm", icon: CloudLightning, title: "Run a storm day", body: "Watch the actions go out." },
-  { to: "/loops", icon: Workflow, title: "See the five loops", body: "How each output feeds the next." },
-  { to: "/hub-twin", icon: Building2, title: "Look inside a hub", body: "One building through a day." },
+  { to: "/command", icon: Workflow, title: "Open Command", body: "Ranked actions for every role." },
+  { to: "/loophub", icon: Building2, title: "Look inside a LoopHub", body: "One building through a day." },
 ] as const;
 
 function Landing() {
@@ -57,7 +57,6 @@ function Landing() {
             <InfoTip label="Why this matters" side="bottom">
               <p className="mb-2 font-medium text-foreground">Why this matters</p>
               <ul className="list-disc space-y-1 pl-4">{WHY.map((w) => <li key={w}>{w}</li>)}</ul>
-              <p className="mt-2">Sources and checking status are on the <Link to="/evidence" className="text-primary-glow underline underline-offset-2">Evidence</Link> page.</p>
             </InfoTip>
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
