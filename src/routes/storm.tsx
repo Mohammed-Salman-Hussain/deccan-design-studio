@@ -2,13 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Area, Bar, CartesianGrid, ComposedChart, Legend, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CheckCircle2, ChevronLeft, ChevronRight, CloudLightning, CloudRain, Droplets, Pause, Play, RotateCcw, Send, Sun, Waves, Zap, type LucideIcon } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Clock, ChevronRight, CloudLightning, CloudRain, Droplets, Pause, Play, RotateCcw, Send, Sun, Waves, Zap, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useApp } from "@/store/app";
 import { fmtL, useLocality } from "@/lib/hooks";
 import { generateActions } from "@/lib/sim/actions";
-import { formatClock, localityHourly, summarizeLocality } from "@/lib/sim/engine";
+import { formatClock, localityHourly, summarizeLocality, weatherAt } from "@/lib/sim/engine";
 import { PageHeader } from "@/components/ll/primitives";
 import { cn } from "@/lib/utils";
 
@@ -172,54 +172,77 @@ function StormPage() {
     { label: "Rain put back in the ground", before: "little to none", after: fmtL(end.rechargeL) },
   ];
 
+  const shownClock = cur ? cur.clock : STEP_DEFS[0].clock;
+  const w = weatherAt("storm", shownClock / 60);
+  const tankNow = tankFor(step);
+  const feed = step >= 0 ? STEP_DEFS.slice(0, step + 1).reverse() : [];
+
   return (
-    <div className="mx-auto max-w-4xl">
-      <PageHeader title="Storm Simulator" description="Press Run storm day and watch the Core read the forecast, flag the risks, dispatch crews, fill tanks on solar and ride through the outage. Use the arrows to step through at your own pace." />
+    <div className="mx-auto max-w-[1400px]">
+      <PageHeader title="Storm Simulator" description="Run a storm day and watch the Core read the forecast, flag the risks, dispatch crews, fill tanks on solar and ride through the outage. Step through at your own pace with the arrows or the timeline.">
+        <Button variant="hero" onClick={toggle} aria-label={running ? "Pause" : "Run Storm Day"}>
+          {running ? <><Pause /> Pause</> : done ? <><RotateCcw /> Run again</> : step < 0 ? <><Play /> Run storm day</> : <><Play /> Resume</>}
+        </Button>
+      </PageHeader>
 
-      <div className="glass overflow-hidden rounded-2xl">
-        <Scene step={step} />
-
-        <div className="border-t p-5">
-          <div className="flex items-start gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="font-mono text-xs text-muted-foreground">{cur ? formatClock(cur.clock) : "Ready"}{cur && ` · step ${step + 1} of ${STEP_DEFS.length}`}</p>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={step} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                  <h2 className="mt-1 font-display text-2xl font-semibold leading-tight">{cur ? cur.title : "A storm is coming"}</h2>
-                  <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">{detail(cur?.key ?? "")}</p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5">
-              <Button variant="glass" size="icon" aria-label="Previous step" disabled={step <= 0} onClick={() => manual(step - 1)}><ChevronLeft /></Button>
-              <Button variant="hero" size="lg" onClick={toggle} aria-label={running ? "Pause" : "Run Storm Day"}>
-                {running ? <><Pause /> Pause</> : done ? <><RotateCcw /> Run again</> : step < 0 ? <><Play /> Run storm day</> : <><Play /> Resume</>}
-              </Button>
-              <Button variant="glass" size="icon" aria-label="Next step" disabled={step >= LAST} onClick={() => manual(step + 1)}><ChevronRight /></Button>
-            </div>
+      <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+        <div className="glass overflow-hidden rounded-xl">
+          <div className="flex flex-wrap gap-2 border-b p-3">
+            <Readout icon={Clock} label="Time" value={step >= 0 ? formatClock(shownClock) : "—"} />
+            <Readout icon={CloudRain} label="Rain" value={step >= 0 ? `${w.rainMm.toFixed(0)} mm/h` : "—"} tone="var(--loop-rain)" />
+            <Readout icon={Zap} label="Grid" value={step >= 0 ? (w.outage ? "Cut" : "On") : "—"} tone={w.outage && step >= 0 ? "var(--destructive)" : "var(--loop-solar)"} />
+            <Readout icon={Droplets} label="LoopHub tank" value={step >= 0 ? `${tankNow}%` : "—"} tone="var(--loop-rain)" />
           </div>
 
-          <ol className="mt-5 flex items-center gap-1.5" aria-label="Storm steps">
-            {STEP_DEFS.map((s, i) => (
-              <li key={s.key} className="flex-1">
-                <button
-                  onClick={() => manual(i)}
-                  aria-label={`${s.title} at ${formatClock(s.clock)}`}
-                  aria-current={i === step ? "step" : undefined}
-                  title={s.title}
-                  className={cn("h-1.5 w-full rounded-full transition-colors", i <= step ? "bg-primary" : "bg-muted hover:bg-accent")}
-                />
-              </li>
-            ))}
-          </ol>
+          <Scene step={step} />
 
-          {step >= 2 && dispatchedCount > 0 && (
-            <p className="mt-4 rounded-xl bg-brand-yellow/50 px-3 py-2 text-sm">
-              {dispatchedCount} tasks are now in the field crew's app.{" "}
-              <Link to="/command" onClick={() => setRole("worker")} className="font-medium text-primary-glow underline-offset-4 hover:underline">Open the Field worker view</Link>
-            </p>
-          )}
+          <div className="flex items-center gap-3 border-t p-3">
+            <Button variant="glass" size="icon" aria-label="Previous step" disabled={step <= 0} onClick={() => manual(step - 1)}><ChevronLeft /></Button>
+            <ol className="grid flex-1 grid-cols-8 gap-1.5" aria-label="Storm timeline">
+              {STEP_DEFS.map((sd, i) => (
+                <li key={sd.key}>
+                  <button
+                    onClick={() => manual(i)}
+                    aria-label={`${sd.title} at ${formatClock(sd.clock)}`}
+                    aria-current={i === step ? "step" : undefined}
+                    title={sd.title}
+                    className="group block w-full text-center"
+                  >
+                    <span className={cn("block h-1.5 w-full rounded-full transition-colors", i <= step ? "bg-primary" : "bg-muted group-hover:bg-accent")} />
+                    <span className={cn("mt-1 hidden font-mono text-[10px] sm:block", i === step ? "font-semibold text-foreground" : "text-muted-foreground")}>{formatClock(sd.clock)}</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+            <Button variant="glass" size="icon" aria-label="Next step" disabled={step >= LAST} onClick={() => manual(step + 1)}><ChevronRight /></Button>
+          </div>
         </div>
+
+        <aside className="glass flex flex-col overflow-hidden rounded-xl lg:max-h-[calc(100dvh-12rem)]" aria-label="Live events">
+          <div className="flex items-center justify-between border-b px-4 py-3">
+            <h2 className="text-sm font-semibold">Live events</h2>
+            <span className="font-mono text-xs text-muted-foreground">{feed.length} of {STEP_DEFS.length}</span>
+          </div>
+          <ol className="flex-1 space-y-0 overflow-y-auto" role="log" aria-live="polite">
+            {feed.length === 0 && (
+              <li className="p-5 text-sm text-muted-foreground">Press Run storm day. Events appear here as the Core reads the forecast, flags risks, sends crews and rides through the power cut.</li>
+            )}
+            <AnimatePresence initial={false}>
+              {feed.map((ev, idx) => (
+                <motion.li key={ev.key} layout initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className={cn("flex gap-3 border-b px-4 py-3 last:border-b-0", idx === 0 && "bg-accent")}>
+                  <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-primary/15 text-primary-glow"><ev.icon className="size-3.5" aria-hidden /></span>
+                  <div className="min-w-0">
+                    <p className="flex items-baseline justify-between gap-2 text-sm font-medium"><span>{ev.title}</span><span className="font-mono text-[11px] font-normal text-muted-foreground">{formatClock(ev.clock)}</span></p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{detail(ev.key)}</p>
+                    {ev.key === "dispatch" && dispatchedCount > 0 && (
+                      <Link to="/command" onClick={() => setRole("worker")} className="mt-1.5 inline-block text-xs font-medium text-primary-glow underline-offset-4 hover:underline">Open the field crew's queue</Link>
+                    )}
+                  </div>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ol>
+        </aside>
       </div>
 
       <AnimatePresence>
@@ -272,13 +295,27 @@ function StormPage() {
 
 const HUB_H = 150;
 
+const tankFor = (step: number) => (step < 3 ? 42 : step <= 4 ? 100 : step === 5 ? 88 : step === 6 ? 72 : 70);
+
+function Readout({ icon: Icon, label, value, tone }: { icon: LucideIcon; label: string; value: string; tone?: string }) {
+  return (
+    <div className="flex min-w-[104px] items-center gap-2.5 rounded-lg border bg-card px-3 py-1.5">
+      <Icon className="size-4 shrink-0" style={{ color: tone ?? "var(--muted-foreground)" }} aria-hidden />
+      <div className="leading-tight">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="font-mono text-sm font-medium tabular">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 /** A small illustrated street that changes with the storm step. */
 function Scene({ step }: { step: number }) {
   const cloudy = step >= 3;
   const raining = step >= 4;
   const night = step >= 5;
   const sunny = step < 3;
-  const tank = step < 3 ? 42 : step <= 4 ? 100 : step === 5 ? 88 : step === 6 ? 72 : 70;
+  const tank = tankFor(step);
   const cut = step >= 5;
   const buildings = [
     { x: 40, w: 120, h: 130 },
