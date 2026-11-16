@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
-import { Truck, Gauge, Send, CheckCheck, ShieldCheck, Map as MapIcon, ListOrdered, Layers, Inbox, Clock, User, FileDown } from "lucide-react";
+import { Truck, Gauge, Zap, Droplets, Flame, Send, CheckCheck, ShieldCheck, Map as MapIcon, ListOrdered, Layers, Inbox, Clock, User, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/store/app";
 import { useActionQueue, useClearedDrains, useLocality, useLocalitySummary, useStepClock, useT, fmtL } from "@/lib/hooks";
 import { drainRisk, feederLoad, weatherAt } from "@/lib/sim/engine";
 import { LOOPS, LOOP_BY_ID } from "@/lib/sim/loops";
 import type { LoopId } from "@/lib/sim/types";
-import { Panel, Stat, StatusPill, Meter, EmptyState, InfoTip } from "@/components/ll/primitives";
+import { Panel, Stat, StatusPill, Meter, EmptyState, InfoTip, Term } from "@/components/ll/primitives";
 import { AnimatedNumber } from "@/components/ll/AnimatedNumber";
 import { LocalityMap, type MapCircle, type MapMarker } from "@/components/map/LocalityMap";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { whyDrain } from "@/lib/why";
 import { ExportReport } from "./ExportReport";
 
 type LayerKey = "flood" | "outage" | "waste" | "tanker" | "heat";
@@ -40,6 +41,7 @@ export function OfficerView() {
   const dispatch = useApp((s) => s.dispatch);
   const setStatus = useApp((s) => s.setStatus);
   const audit = useApp((s) => s.audit);
+  const detailed = useApp((s) => s.detailed);
   const cleared = useClearedDrains();
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>({ flood: true, outage: false, waste: false, tanker: false, heat: false });
   const [filter, setFilter] = useState<LoopId | "all">("all");
@@ -97,9 +99,16 @@ export function OfficerView() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className={cn("grid grid-cols-2 gap-3", detailed && "md:grid-cols-3 xl:grid-cols-5")}>
         <Stat label={t("kpi.score")} icon={Gauge} color="var(--primary-glow)" value={<AnimatedNumber value={sum.score} decimals={1} />} hint="Flat-weighted mean of all hub loop scores, plus a bonus for completed field tasks." />
         <Stat label={t("kpi.tankers")} icon={Truck} color="var(--loop-save)" value={<AnimatedNumber value={sum.tankersAvoided} decimals={1} />} hint={`(extra reuse + pit top-up + 25% of recharge + shortage avoided) ÷ 5,000 L. Water reused so far: ${fmtL(sum.rechargeL + sum.reuseL)}.`} />
+        {detailed && (
+          <>
+            <Stat label={t("kpi.kwh")} icon={Zap} color="var(--loop-solar)" value={<AnimatedNumber value={sum.kwhShifted} decimals={0} />} hint="Grid energy moved out of the 6–10 am and 6–10 pm peak hours, compared with the same day without LoopLocal." />
+            <Stat label={t("kpi.recharge")} icon={Droplets} color="var(--loop-rain)" value={<span className="tabular">{fmtL(sum.rechargeL)}</span>} hint="Roof runoff sent into recharge pits so far today. Roof area × rain × 0.8 × pit capacity." />
+            <Stat label={t("kpi.waste")} icon={Flame} color="var(--loop-waste)" value={<span className="tabular">{Math.round(sum.wasteDivertedKg).toLocaleString("en-IN")} kg</span>} hint="Kitchen waste sent to a biogas unit instead of the drains, so far today." />
+          </>
+        )}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
@@ -217,7 +226,13 @@ export function OfficerView() {
                 <li key={d.id}>
                   <div className="flex items-center justify-between gap-2">
                     <p className="truncate text-sm"><span className="font-mono text-xs text-primary-glow">{d.id}</span> {d.name}</p>
-                    <span className="font-mono text-xs tabular" style={{ color: riskColor(r) }}>{r}%</span>
+                    <span className="flex items-center gap-1">
+                      <span className="font-mono text-xs tabular" style={{ color: riskColor(r) }}>{r}%</span>
+                      <InfoTip label={`Why ${d.id} is at ${r}%`}>
+                        <p className="mb-1 font-medium text-foreground">{d.name}, {d.area}</p>
+                        <ul className="list-disc space-y-1 pl-4">{whyDrain(d, scenario, clock, cleared.has(d.id), wasteShare).map((x) => <li key={x}>{x}</li>)}</ul>
+                      </InfoTip>
+                    </span>
                   </div>
                   <Meter value={r} className="mt-1 h-1.5" color={riskColor(r)} label={`${d.id} risk`} />
                   {cleared.has(d.id) && <p className="mt-0.5 text-[11px] text-muted-foreground">Cleared today</p>}
@@ -252,7 +267,7 @@ export function OfficerView() {
         </TabsContent>
 
         <TabsContent value="water" className="mt-3">
-          <Panel title="Treated water" subtitle="Which hub plants are registered for Green Water, and the tanker bookings that follow.">
+          <Panel title="Treated water" subtitle={<>Which hub <Term k="stp">STPs</Term> are registered for <Term k="greenWater" />, and the tanker bookings that follow.</>}>
             <div className="grid gap-5 md:grid-cols-[160px_1fr]">
               <div className="flex flex-col items-center">
                 <div className="h-28 w-28">

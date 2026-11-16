@@ -1,15 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { ArrowRight, CloudRain, Clock, Droplets, Gauge, ListChecks, Send, Zap } from "lucide-react";
+import { ArrowRight, Play, CloudRain, Clock, Droplets, Gauge, ListChecks, Send, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { HeroRing3D } from "@/components/ll/ClientCanvas";
 import { Button } from "@/components/ui/button";
 import { InfoTip, Meter, PageHeader, Panel } from "@/components/ll/primitives";
+import { LensSwitch } from "@/components/ll/LensSwitch";
+import { weakestLoop } from "@/lib/why";
 import { AnimatedNumber } from "@/components/ll/AnimatedNumber";
 import { formatClock, weatherAt } from "@/lib/sim/engine";
 import { LOOPS, LOOP_BY_ID } from "@/lib/sim/loops";
 import { useApp } from "@/store/app";
-import { useActionQueue, useLocality, useLocalitySummary } from "@/lib/hooks";
+import { useGuide } from "@/store/guide";
+import { useActionQueue, useLensedSummary, useLocality } from "@/lib/hooks";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,12 +45,16 @@ function Landing() {
   const setScenario = useApp((s) => s.setScenario);
   const setRole = useApp((s) => s.setRole);
   const loc = useLocality();
-  const sum = useLocalitySummary();
+  const sum = useLensedSummary();
+  const lens = useApp((s) => s.lens);
+  const detailed = useApp((s) => s.detailed);
   const queue = useActionQueue();
+  const startDemo = useGuide((s) => s.startDemo);
   const w = weatherAt(scenario, clock / 60);
   const pending = queue.filter((q) => q.status === "pending").sort((a, b) => b.priority - a.priority);
   const next = pending.slice(0, 4);
-  const hubs = [...sum.hubs].sort((a, b) => a.score - b.score);
+  const hubScore = (h: (typeof sum.hubs)[number]) => (lens === "without" ? h.base.score : h.score);
+  const hubs = [...sum.hubs].sort((a, b) => hubScore(a) - hubScore(b));
 
   return (
     <div className="mx-auto max-w-[1400px]">
@@ -61,7 +68,9 @@ function Landing() {
           </>
         }
       >
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="glass" size="sm" onClick={startDemo}><Play /> Watch the 2-minute demo</Button>
+          <LensSwitch />
           <Readout icon={Clock} label="Time" value={formatClock(clock)} />
           <Readout icon={CloudRain} label="Weather" value={w.rainMm > 0.5 ? `Rain ${w.rainMm.toFixed(0)} mm/h` : `${w.temp.toFixed(0)} °C`} />
           <Readout icon={Zap} label="Grid" value={w.outage ? "Power cut" : "On"} danger={w.outage} />
@@ -104,17 +113,21 @@ function Landing() {
 
         <Panel title="Hubs" icon={Droplets} subtitle="Lowest Loop Score first. Tank level is the overhead tank right now. Open a hub to see its day in LoopHub.">
           <ul className="divide-y">
-            {hubs.slice(0, 6).map((h) => (
+            {hubs.slice(0, detailed ? 6 : 4).map((h) => {
+              const weak = detailed ? weakestLoop(h, lens === "without" ? h.base.scores : h.scores) : null;
+              return (
               <li key={h.hub.id}>
                 <Link to="/loophub" onClick={() => set({ hubId: h.hub.id })} className="flex items-center gap-3 py-2.5 hover:text-primary-glow">
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">{h.hub.name}</span>
                     <Meter value={h.now.tankPct} className="mt-1.5 h-1.5" color="var(--loop-rain)" label={`${h.hub.name} tank level`} />
+                    {weak && <span className="mt-1 block truncate text-[11px] text-muted-foreground">Weakest: {weak.short} ({weak.score}) · {weak.reason}</span>}
                   </span>
-                  <span className="w-10 text-right font-display text-lg font-semibold tabular">{Math.round(h.score)}</span>
+                  <span className="w-10 text-right font-display text-lg font-semibold tabular">{Math.round(hubScore(h))}</span>
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </Panel>
       </div>

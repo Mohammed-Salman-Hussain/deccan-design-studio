@@ -4,13 +4,17 @@ import { Area, Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContai
 import { BookOpen, Droplets, Flame, IndianRupee, Truck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/app";
-import { fmtL, fmtRs, useLocality, useLocalitySummary } from "@/lib/hooks";
+import { fmtL, fmtRs, useLensedSummary, useLocality } from "@/lib/hooks";
 import { localityHourly } from "@/lib/sim/engine";
 import { LOOPS } from "@/lib/sim/loops";
 import { AnimatedNumber } from "@/components/ll/AnimatedNumber";
-import { InfoTip, Meter, PageHeader, Panel, Stat } from "@/components/ll/primitives";
+import { InfoTip, Meter, PageHeader, Panel, Stat, Term } from "@/components/ll/primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Evidence } from "@/components/platform/Evidence";
+import { PolicySandbox } from "@/components/impact/PolicySandbox";
+import { Replicate } from "@/components/impact/Replicate";
+import { Sdg9 } from "@/components/impact/Sdg9";
+import { LensSwitch } from "@/components/ll/LensSwitch";
 
 export const Route = createFileRoute("/impact")({
   head: () => ({
@@ -29,28 +33,34 @@ const axis = { fontSize: 10, fill: "var(--muted-foreground)" };
 
 function ImpactPage() {
   const loc = useLocality();
-  const sum = useLocalitySummary();
+  const sum = useLensedSummary();
+  const lens = useApp((s) => s.lens);
+  const detailed = useApp((s) => s.detailed);
   const scenario = useApp((s) => s.scenario);
   const set = useApp((s) => s.set);
-  const hourly = useMemo(() => localityHourly(loc, scenario), [loc, scenario]);
-  const hubBars = useMemo(() => sum.hubs.map((h) => ({ name: h.hub.name.length > 16 ? `${h.hub.name.slice(0, 15)}…` : h.hub.name, diverted: Math.round(h.wasteDivertedKg), generated: Math.round(h.wasteGeneratedKg) })), [sum]);
+  const hourly = useMemo(() => localityHourly(loc, scenario, lens === "with"), [loc, scenario, lens]);
+  const hubBars = useMemo(() => sum.hubs.map((h) => ({ name: h.hub.name.length > 16 ? `${h.hub.name.slice(0, 15)}…` : h.hub.name, diverted: Math.round(lens === "without" ? h.base.wasteDivertedKg : h.wasteDivertedKg), generated: Math.round(h.wasteGeneratedKg) })), [sum, lens]);
 
   const sdgs = [
-    { n: 6, title: "Clean water and sanitation", bg: "var(--loop-rain)", fg: "#ffffff", stat: `${fmtL(sum.rechargeL + sum.reuseL)} recharged or reused` },
-    { n: 7, title: "Affordable and clean energy", bg: "var(--brand-orange)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.solarKWh).toLocaleString("en-IN")} kWh from solar` },
-    { n: 9, title: "Industry, innovation and infrastructure", bg: "var(--brand-burgundy)", fg: "#ffffff", stat: `${loc.hubs.length} hubs coordinated by one engine` },
-    { n: 11, title: "Sustainable cities and communities", bg: "var(--brand-yellow)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.wasteDivertedKg).toLocaleString("en-IN")} kg wet waste kept out of drains` },
+    { n: 6, targets: ["6.3", "6.4"], title: "Clean water and sanitation", bg: "var(--loop-rain)", fg: "#ffffff", stat: `${fmtL(sum.rechargeL + sum.reuseL)} recharged or reused` },
+    { n: 7, targets: ["7.2", "7.3"], title: "Affordable and clean energy", bg: "var(--brand-orange)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.solarKWh).toLocaleString("en-IN")} kWh from solar` },
+    { n: 9, targets: ["9.1", "9.4"], title: "Industry, innovation and infrastructure", bg: "var(--brand-burgundy)", fg: "#ffffff", stat: `${loc.hubs.length} hubs coordinated by one engine` },
+    { n: 11, targets: ["11.5", "11.6"], title: "Sustainable cities and communities", bg: "var(--brand-yellow)", fg: "var(--primary-foreground)", stat: `${Math.round(sum.wasteDivertedKg).toLocaleString("en-IN")} kg wet waste kept out of drains` },
   ];
 
   return (
     <div className="mx-auto max-w-[1200px]">
       <PageHeader title="Impact" description="Totals so far today for every hub in the locality. Move the clock or change the scenario and every number and chart follows.">
+        <LensSwitch />
         <Button variant="glass" size="sm" onClick={() => set({ assumptionsOpen: true })}><BookOpen /> Assumptions</Button>
       </PageHeader>
 
       <Tabs defaultValue="today">
         <TabsList className="mb-3">
           <TabsTrigger value="today">Today</TabsTrigger>
+          <TabsTrigger value="whatif">What if</TabsTrigger>
+          <TabsTrigger value="replicate">Replicate</TabsTrigger>
+          <TabsTrigger value="sdg9">SDG 9</TabsTrigger>
           <TabsTrigger value="evidence">Evidence</TabsTrigger>
         </TabsList>
 
@@ -59,8 +69,16 @@ function ImpactPage() {
           <Stat label="Loop Score" value={<AnimatedNumber value={sum.score} decimals={1} />} sub="of 100" color="var(--primary-glow)" hint="Average of the five loop scores, weighted by flats, plus a bonus for completed tasks." />
           <Stat label="Water recycled" value={<AnimatedNumber value={sum.rechargeL + sum.reuseL} format={fmtL} />} icon={Droplets} color="var(--loop-rain)" hint="Litres sent to recharge pits plus treated water reused." />
           <Stat label="Tankers avoided" value={<AnimatedNumber value={sum.tankersAvoided} decimals={1} />} icon={Truck} color="var(--loop-save)" hint="Counted in 5,000 L tanker trips." />
-          <Stat label="Saved today" value={<AnimatedNumber value={sum.savingsRs} format={fmtRs} />} icon={IndianRupee} color="var(--loop-solar)" hint="Energy and tanker savings. Peak kWh shifted and wet waste to biogas are shown in the charts below." />
+          <Stat label="Saved today" value={<AnimatedNumber value={sum.savingsRs} format={fmtRs} />} icon={IndianRupee} color="var(--loop-solar)" hint="Energy and tanker savings. Peak kWh shifted and wet waste to biogas are in the Detailed view." />
         </div>
+          {detailed && (
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <Stat label="Peak kWh shifted" value={<AnimatedNumber value={sum.kwhShifted} decimals={0} />} icon={Zap} color="var(--loop-solar)" hint="Grid energy moved out of the 6–10 am and 6–10 pm peak hours, compared with the same day without LoopLocal." />
+              <Stat label="Wet waste to biogas" value={<span className="tabular">{Math.round(sum.wasteDivertedKg).toLocaleString("en-IN")} kg</span>} icon={Flame} color="var(--loop-waste)" hint="Kitchen waste sent to a biogas unit instead of the drains, so far today." />
+              <Stat label="Street water avoided" value={<span className="tabular">{fmtL(Math.max(0, sum.streetBaseL - sum.streetL))}</span>} icon={Droplets} color="var(--loop-rain)" hint="Rain runoff sent into recharge pits instead of running onto streets, compared with the same day without LoopLocal." />
+              <Stat label="Shortage avoided" value={<span className="tabular">{fmtL(Math.max(0, sum.shortageBaseL - sum.shortageL))}</span>} icon={Truck} color="var(--loop-save)" hint="Water demand that would have gone unmet without early tank top-ups before the cut." />
+            </div>
+          )}
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[320px_1fr]">
           <Panel title="Loop Score by loop" subtitle="Weighted across all hubs.">
@@ -100,7 +118,7 @@ function ImpactPage() {
                 </div>
               </TabsContent>
               <TabsContent value="energy" className="mt-3">
-                <p className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">Solar output and grid draw, with and without LoopLocal <InfoTip label="About this chart">The gap between the dashed and solid lines is grid energy that LoopLocal avoids, mostly in the 6–10 am and 6–10 pm peaks. {Math.round(sum.kwhShifted)} kWh shifted so far today.</InfoTip></p>
+                <p className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">Solar output and grid draw, with and without LoopLocal <InfoTip label="About this chart">The gap between the dashed and solid lines is grid energy that LoopLocal avoids, mostly in the <Term k="peak">peak hours</Term>. {Math.round(sum.kwhShifted)} kWh shifted so far today.</InfoTip></p>
                 <div className="h-64" role="img" aria-label="Hourly solar output and grid draw with and without LoopLocal">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={hourly} margin={{ top: 6, right: 4, bottom: 0, left: -12 }}>
@@ -141,7 +159,7 @@ function ImpactPage() {
             {sdgs.map((g) => (
               <li key={g.n} className="glass flex items-center gap-3 rounded-xl p-3">
                 <span className="grid size-10 shrink-0 place-items-center rounded-lg font-display text-lg font-bold" style={{ background: g.bg, color: g.fg }} aria-hidden>{g.n}</span>
-                <p className="min-w-0 flex-1 text-sm font-medium leading-tight">SDG {g.n}</p>
+                <p className="min-w-0 flex-1 text-sm font-medium leading-tight">SDG {g.n}<span className="block font-mono text-[10px] font-normal text-muted-foreground">targets {g.targets.join(" · ")}</span></p>
                 <InfoTip label={`About SDG ${g.n}`}><p className="mb-1 font-medium text-foreground">{g.title}</p>{g.stat}</InfoTip>
               </li>
             ))}
@@ -149,6 +167,9 @@ function ImpactPage() {
         </section>
         </TabsContent>
 
+        <TabsContent value="whatif"><PolicySandbox key={loc.id} /></TabsContent>
+        <TabsContent value="replicate"><Replicate /></TabsContent>
+        <TabsContent value="sdg9"><Sdg9 /></TabsContent>
         <TabsContent value="evidence"><Evidence /></TabsContent>
       </Tabs>
     </div>

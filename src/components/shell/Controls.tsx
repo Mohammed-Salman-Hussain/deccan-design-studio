@@ -1,4 +1,5 @@
-import { Pause, Play, Sun, CloudLightning, Thermometer, Zap, Bell, Moon, Sunrise, Sunset, RotateCcw, MoreHorizontal, SlidersHorizontal } from "lucide-react";
+import { Pause, Play, Sun, CloudLightning, Thermometer, Zap, Bell, Moon, Sunrise, Sunset, RotateCcw, MoreHorizontal, SlidersHorizontal, HelpCircle, Route as RouteIcon } from "lucide-react";
+import { useGuide } from "@/store/guide";
 import { useApp } from "@/store/app";
 import { LOCALITIES } from "@/lib/sim/data";
 import { formatClock, SCENARIOS } from "@/lib/sim/engine";
@@ -126,6 +127,21 @@ export function RoleSwitch({ className, compact }: { className?: string; compact
   );
 }
 
+/** Simple keeps headline numbers; Detailed adds the secondary ones and short explanations. */
+export function DetailSwitch({ className }: { className?: string }) {
+  const detailed = useApp((s) => s.detailed);
+  const set = useApp((s) => s.set);
+  return (
+    <div role="radiogroup" aria-label="Detail level" className={cn("flex items-center gap-0.5 rounded-lg border bg-card p-0.5", className)}>
+      {([[false, "Simple"], [true, "Detailed"]] as const).map(([v, label]) => (
+        <button key={label} role="radio" aria-checked={detailed === v} onClick={() => set({ detailed: v })} className={cn("h-8 flex-1 whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors", detailed === v ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:text-foreground")}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function LangSwitch() {
   const lang = useApp((s) => s.lang);
   const set = useApp((s) => s.set);
@@ -151,6 +167,8 @@ export function IconButtons() {
   const notices = useApp((s) => s.notices);
   const markRead = useApp((s) => s.markNoticesRead);
   const resetDemo = useApp((s) => s.resetDemo);
+  const openTour = useGuide((s) => s.openTour);
+  const startDemo = useGuide((s) => s.startDemo);
   const unread = notices.filter((n) => !n.read).length;
   return (
     <div className="flex items-center gap-1">
@@ -183,11 +201,31 @@ export function IconButtons() {
 
       <Popover>
         <PopoverTrigger asChild>
+          <button aria-label="Help and tour" className="grid size-9 place-items-center rounded-lg border bg-card hover:bg-accent">
+            <HelpCircle className="size-4" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-60 space-y-1 p-2">
+          <button onClick={() => openTour(0)} className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm hover:bg-accent">
+            <RouteIcon className="size-4 text-muted-foreground" aria-hidden /> Take the 1-minute tour
+          </button>
+          <button onClick={startDemo} className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm hover:bg-accent">
+            <Play className="size-4 text-muted-foreground" aria-hidden /> Watch the 2-minute demo
+          </button>
+        </PopoverContent>
+      </Popover>
+
+      <Popover>
+        <PopoverTrigger asChild>
           <button aria-label="More options" className="grid size-9 place-items-center rounded-lg border bg-card hover:bg-accent">
             <MoreHorizontal className="size-4" />
           </button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64 space-y-3 p-3">
+          <div>
+            <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Detail level</p>
+            <DetailSwitch />
+          </div>
           <div>
             <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Language</p>
             <LangSwitch />

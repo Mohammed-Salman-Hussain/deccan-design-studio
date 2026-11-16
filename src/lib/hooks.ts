@@ -42,6 +42,13 @@ export function useLocalitySummary() {
   return useMemo(() => summarizeLocality(loc, scenario, t, bonus), [loc, scenario, t, bonus]);
 }
 
+/** The locality summary, or the same day with no coordination when the viewer has switched to "Without". */
+export function useLensedSummary() {
+  const sum = useLocalitySummary();
+  const lens = useApp((s) => s.lens);
+  return useMemo(() => (lens === "without" ? { ...sum, ...sum.base } : sum), [sum, lens]);
+}
+
 export function useHubSummary() {
   const hub = useHub();
   const scenario = useApp((s) => s.scenario);

@@ -6,8 +6,10 @@ import { useApp } from "@/store/app";
 import { NAV } from "./nav";
 import { ScenarioBanner } from "./ScenarioBanner";
 import { Logo } from "@/components/ll/LoopRing";
-import { ClockControl, IconButtons, LocalityHubSelect, ScenarioSwitch } from "./Controls";
+import { ClockControl, DetailSwitch, IconButtons, LocalityHubSelect, ScenarioSwitch } from "./Controls";
 import { AssumptionsSheet } from "./AssumptionsSheet";
+import { Tour } from "@/components/guide/Tour";
+import { Demo } from "@/components/guide/Demo";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useT } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
@@ -101,6 +103,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <LocalityHubSelect />
               <ScenarioSwitch />
               <div className="ml-auto flex shrink-0 items-center gap-2">
+                <DetailSwitch className="hidden xl:flex" />
                 <ClockControl />
                 <IconButtons />
               </div>
@@ -131,6 +134,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Sheet>
 
       <AssumptionsSheet />
+      <Tour />
+      <Demo />
       <Toaster position="top-right" closeButton />
     </TooltipProvider>
   );
