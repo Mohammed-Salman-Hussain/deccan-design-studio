@@ -47,9 +47,7 @@ export function ScenarioBanner() {
           className="overflow-hidden border-b"
           role="status"
         >
-          <div className="relative overflow-hidden px-3 py-2 md:px-5" style={{ background: `linear-gradient(90deg, color-mix(in oklab, ${LOOK[scenario].tone} 22%, transparent), transparent 75%)` }}>
-            {scenario === "storm" && <RainStreaks />}
-            {scenario === "heatwave" && <div className="pointer-events-none absolute inset-0 animate-aurora opacity-60" style={{ background: "radial-gradient(40% 120% at 20% 50%, color-mix(in oklab, var(--destructive) 25%, transparent), transparent)" }} />}
+          <div className="relative overflow-hidden px-3 py-2 md:px-5" style={{ background: `color-mix(in oklab, ${LOOK[scenario].tone} 9%, var(--card))` }}>
             <div className="relative flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
               <span className="flex items-center gap-2 font-semibold">
                 {(() => { const I = LOOK[scenario].icon; return <I className="size-4" style={{ color: LOOK[scenario].tone }} aria-hidden />; })()}
@@ -85,17 +83,5 @@ function Chip({ icon: Icon, children, danger }: { icon: typeof Zap; children: Re
       <Icon className="size-3" aria-hidden />
       {children}
     </span>
-  );
-}
-
-function RainStreaks() {
-  return (
-    <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-40" preserveAspectRatio="none" aria-hidden>
-      <g stroke="var(--loop-rain)" strokeWidth="1" className="animate-rain">
-        {Array.from({ length: 60 }, (_, i) => (
-          <line key={i} x1={`${(i * 1.7) % 100}%`} y1={-20 + ((i * 13) % 30)} x2={`${(i * 1.7) % 100 - 0.4}%`} y2={-6 + ((i * 13) % 30)} />
-        ))}
-      </g>
-    </svg>
   );
 }

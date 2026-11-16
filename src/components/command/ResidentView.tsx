@@ -51,23 +51,7 @@ export function ResidentView() {
 
   return (
     <div className="space-y-4">
-      {hasAlerts && (
-        <ul className="space-y-2" aria-label={t("resident.alerts")}>
-          {alerts.map((a) => (
-            <li key={a.title} className="flex gap-3 rounded-xl border p-3" style={{ borderColor: `color-mix(in oklab, ${a.tone} 35%, transparent)`, background: `color-mix(in oklab, ${a.tone} 8%, transparent)` }}>
-              <a.icon className="mt-0.5 size-4 shrink-0" style={{ color: a.tone }} aria-hidden />
-              <div><p className="text-sm font-medium">{a.title}</p><p className="text-xs text-muted-foreground">{a.body}</p></div>
-            </li>
-          ))}
-          {notices.slice(0, 1).map((n) => (
-            <li key={n.id} className="flex gap-3 rounded-xl border p-3">
-              <Bell className="mt-0.5 size-4 shrink-0 text-primary-glow" aria-hidden />
-              <div className="min-w-0"><p className="text-sm font-medium">{n.title}</p><p className="text-xs text-muted-foreground">{n.body}</p></div>
-            </li>
-          ))}
-        </ul>
-      )}
-
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
       <Panel title={t("resident.plan")} subtitle={`${hub.name} · ${hub.flats} flats · ${hub.area}`} icon={Sun}>
         <motion.p key={plan.headline} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="font-display text-xl font-semibold leading-snug">{plan.headline}</motion.p>
         <ol className="relative mt-5 space-y-3 border-l pl-5">
@@ -87,6 +71,24 @@ export function ResidentView() {
         </ol>
       </Panel>
 
+        <div className="space-y-4">
+      {hasAlerts && (
+        <ul className="space-y-2" aria-label={t("resident.alerts")}>
+          {alerts.map((a) => (
+            <li key={a.title} className="flex gap-3 rounded-xl border p-3" style={{ borderColor: `color-mix(in oklab, ${a.tone} 35%, transparent)`, background: `color-mix(in oklab, ${a.tone} 8%, transparent)` }}>
+              <a.icon className="mt-0.5 size-4 shrink-0" style={{ color: a.tone }} aria-hidden />
+              <div><p className="text-sm font-medium">{a.title}</p><p className="text-xs text-muted-foreground">{a.body}</p></div>
+            </li>
+          ))}
+          {notices.slice(0, 1).map((n) => (
+            <li key={n.id} className="flex gap-3 rounded-xl border p-3">
+              <Bell className="mt-0.5 size-4 shrink-0 text-primary-glow" aria-hidden />
+              <div className="min-w-0"><p className="text-sm font-medium">{n.title}</p><p className="text-xs text-muted-foreground">{n.body}</p></div>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <Panel
         title={t("kpi.tank")}
         icon={Droplet}
@@ -100,6 +102,9 @@ export function ResidentView() {
           </div>
         </div>
       </Panel>
+
+        </div>
+      </div>
 
       <Tabs defaultValue="chart">
         <TabsList>

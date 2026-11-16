@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { ArrowRight, CloudLightning } from "lucide-react";
+
+import { ArrowRight, CloudRain, Clock, Droplets, Gauge, ListChecks, Send, Zap } from "lucide-react";
+import { toast } from "sonner";
 import { HeroRing3D } from "@/components/ll/ClientCanvas";
 import { Button } from "@/components/ui/button";
-import { InfoTip } from "@/components/ll/primitives";
-import { LOOPS } from "@/lib/sim/loops";
+import { InfoTip, Meter, PageHeader, Panel } from "@/components/ll/primitives";
+import { AnimatedNumber } from "@/components/ll/AnimatedNumber";
+import { formatClock, weatherAt } from "@/lib/sim/engine";
+import { LOOPS, LOOP_BY_ID } from "@/lib/sim/loops";
 import { useApp } from "@/store/app";
-import { useLocality } from "@/lib/hooks";
+import { useActionQueue, useLocality, useLocalitySummary } from "@/lib/hooks";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,41 +35,92 @@ const WHY = [
 
 function Landing() {
   const reduce = useApp((s) => s.reduceMotion);
+  const scenario = useApp((s) => s.scenario);
+  const clock = useApp((s) => s.clock);
+  const set = useApp((s) => s.set);
+  const dispatch = useApp((s) => s.dispatch);
   const setScenario = useApp((s) => s.setScenario);
   const setRole = useApp((s) => s.setRole);
   const loc = useLocality();
+  const sum = useLocalitySummary();
+  const queue = useActionQueue();
+  const w = weatherAt(scenario, clock / 60);
+  const pending = queue.filter((q) => q.status === "pending").sort((a, b) => b.priority - a.priority);
+  const next = pending.slice(0, 4);
+  const hubs = [...sum.hubs].sort((a, b) => a.score - b.score);
 
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-9rem)] max-w-6xl flex-col justify-center gap-12 pb-6">
-      <section className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
-        <div>
-          <p className="mb-4 text-sm font-medium text-muted-foreground">{loc.name}, Hyderabad</p>
-          <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-gradient text-4xl font-semibold leading-[1.08] sm:text-5xl lg:text-6xl">
-            A neighbourhood where nothing is wasted.
-          </motion.h1>
-          <p className="mt-5 flex max-w-md items-start gap-1.5 text-lg text-muted-foreground">
-            <span>One system for a colony's water, power, waste and drains.</span>
-            <InfoTip label="Why this matters" side="bottom">
-              <p className="mb-2 font-medium text-foreground">Why this matters</p>
-              <ul className="list-disc space-y-1 pl-4">{WHY.map((w) => <li key={w}>{w}</li>)}</ul>
-            </InfoTip>
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild variant="hero" size="lg">
-              <Link to="/command">Open Command <ArrowRight /></Link>
-            </Button>
-            <Button asChild variant="glass" size="lg" onClick={() => { setScenario("storm"); setRole("officer"); }}>
-              <Link to="/storm"><CloudLightning /> Run a storm day</Link>
-            </Button>
-          </div>
+    <div className="mx-auto max-w-[1400px]">
+      <PageHeader
+        title="Overview"
+        description={
+          <>
+            LoopLocal runs a colony's water, power, waste and drains as one system.
+            <span className="mt-2 block font-medium text-foreground">Why this matters</span>
+            <ul className="mt-1 list-disc space-y-1 pl-4">{WHY.map((x) => <li key={x}>{x}</li>)}</ul>
+          </>
+        }
+      >
+        <div className="flex flex-wrap gap-2">
+          <Readout icon={Clock} label="Time" value={formatClock(clock)} />
+          <Readout icon={CloudRain} label="Weather" value={w.rainMm > 0.5 ? `Rain ${w.rainMm.toFixed(0)} mm/h` : `${w.temp.toFixed(0)} °C`} />
+          <Readout icon={Zap} label="Grid" value={w.outage ? "Power cut" : "On"} danger={w.outage} />
         </div>
-        <div className="relative aspect-square w-full max-w-[460px] justify-self-center">
-          <HeroRing3D reduce={reduce} />
-        </div>
-      </section>
+      </PageHeader>
 
-      <section aria-label="The five loops">
-        <ul className="flex flex-wrap justify-center gap-2.5">
+      <div className="grid gap-4 lg:grid-cols-[320px_1fr_1fr]">
+        <Panel title="Loop Score" icon={Gauge} subtitle="Flat-weighted mean of every hub's loop scores, plus a bonus for completed field tasks.">
+          <div className="relative mx-auto aspect-square w-full max-w-[260px]">
+            <HeroRing3D reduce={reduce} />
+          </div>
+          <p className="-mt-2 text-center font-display text-4xl font-semibold tabular text-primary-glow"><AnimatedNumber value={sum.score} decimals={1} /></p>
+          <p className="mb-2 mt-1 text-center text-xs text-muted-foreground">{loc.name} · {loc.hubs.length} hubs</p>
+        </Panel>
+
+        <Panel
+          title="Next actions"
+          icon={ListChecks}
+          action={<Button asChild size="sm" variant="ghost"><Link to="/command" onClick={() => setRole("officer")}>Open Command <ArrowRight /></Link></Button>}
+          subtitle="Ranked by the decision engine across all five loops. Dispatch sends a task to the field crew's queue."
+        >
+          {next.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">Nothing waiting. Every action has been sent.</p>
+          ) : (
+            <ul className="divide-y">
+              {next.map((a) => (
+                <li key={a.id} className="flex items-center gap-3 py-2.5">
+                  <span className="w-1 self-stretch rounded-full" style={{ background: LOOP_BY_ID[a.loop].color }} aria-hidden />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{a.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{a.assignee} · by {a.deadline}</p>
+                  </div>
+                  <Button size="sm" variant="soft" onClick={() => { dispatch(a); toast.success("Dispatched", { description: `${a.title} → ${a.assignee}` }); }}><Send /> Dispatch</Button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {pending.length > next.length && <p className="mt-2 text-xs text-muted-foreground">{pending.length - next.length} more in Command.</p>}
+        </Panel>
+
+        <Panel title="Hubs" icon={Droplets} subtitle="Lowest Loop Score first. Tank level is the overhead tank right now. Open a hub to see its day in LoopHub.">
+          <ul className="divide-y">
+            {hubs.slice(0, 6).map((h) => (
+              <li key={h.hub.id}>
+                <Link to="/loophub" onClick={() => set({ hubId: h.hub.id })} className="flex items-center gap-3 py-2.5 hover:text-primary-glow">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{h.hub.name}</span>
+                    <Meter value={h.now.tankPct} className="mt-1.5 h-1.5" color="var(--loop-rain)" label={`${h.hub.name} tank level`} />
+                  </span>
+                  <span className="w-10 text-right font-display text-lg font-semibold tabular">{Math.round(h.score)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      </div>
+
+      <section aria-label="The five loops" className="mt-4">
+        <ul className="flex flex-wrap items-center gap-2.5">
           {LOOPS.map((l) => (
             <li key={l.id} className="flex items-center gap-2 rounded-full border bg-card py-1.5 pl-2 pr-1.5">
               <span className="grid size-6 shrink-0 place-items-center rounded-full" style={{ background: `color-mix(in oklab, ${l.color} 16%, transparent)`, color: l.color }}>
@@ -80,8 +134,25 @@ function Landing() {
               </InfoTip>
             </li>
           ))}
+          <li className="ml-auto">
+            <Button asChild size="sm" variant="glass">
+              <Link to="/storm" onClick={() => { setScenario("storm"); setRole("officer"); }}>Run a storm day <ArrowRight /></Link>
+            </Button>
+          </li>
         </ul>
       </section>
+    </div>
+  );
+}
+
+function Readout({ icon: Icon, label, value, danger }: { icon: typeof Clock; label: string; value: string; danger?: boolean }) {
+  return (
+    <div className="flex min-w-[110px] items-center gap-2.5 rounded-lg border bg-card px-3 py-1.5">
+      <Icon className="size-4 shrink-0" style={{ color: danger ? "var(--destructive)" : "var(--muted-foreground)" }} aria-hidden />
+      <div className="leading-tight">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className={`font-mono text-sm font-medium tabular ${danger ? "text-destructive" : ""}`}>{value}</p>
+      </div>
     </div>
   );
 }
