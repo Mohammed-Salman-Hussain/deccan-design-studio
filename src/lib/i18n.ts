@@ -6,6 +6,7 @@ const dict = {
   "nav.twin": { en: "LoopHub", te: "లూప్‌హబ్", hi: "लूपहब" },
   "nav.storm": { en: "Storm Simulator", te: "తుఫాను సిమ్యులేటర్", hi: "तूफ़ान सिम्युलेटर" },
   "nav.impact": { en: "Impact", te: "ప్రభావం", hi: "प्रभाव" },
+  "nav.platform": { en: "Platform", te: "ప్లాట్‌ఫారమ్", hi: "प्लेटफ़ॉर्म" },
   "role.officer": { en: "Officer", te: "అధికారి", hi: "अधिकारी" },
   "role.resident": { en: "Resident", te: "నివాసి", hi: "निवासी" },
   "role.worker": { en: "Field Worker", te: "క్షేత్ర కార్మికుడు", hi: "फ़ील्ड कर्मी" },

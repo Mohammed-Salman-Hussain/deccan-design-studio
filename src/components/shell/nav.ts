@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, CloudLightning, BarChart3, Home } from "lucide-react";
+import { LayoutDashboard, Building2, CloudLightning, BarChart3, Home, Cpu } from "lucide-react";
 import type { TKey } from "@/lib/i18n";
 
 export const NAV = [
@@ -7,4 +7,5 @@ export const NAV = [
   { to: "/loophub", key: "nav.twin" as TKey, icon: Building2 },
   { to: "/storm", key: "nav.storm" as TKey, icon: CloudLightning },
   { to: "/impact", key: "nav.impact" as TKey, icon: BarChart3 },
+  { to: "/platform", key: "nav.platform" as TKey, icon: Cpu },
 ] as const;
