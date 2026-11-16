@@ -11,14 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommandRouteImport } from './routes/command'
-import { Route as EvidenceRouteImport } from './routes/evidence'
-import { Route as HardwareRouteImport } from './routes/hardware'
-import { Route as HubTwinRouteImport } from './routes/hub-twin'
 import { Route as ImpactRouteImport } from './routes/impact'
-import { Route as InnovationRouteImport } from './routes/innovation'
-import { Route as LoopsRouteImport } from './routes/loops'
-import { Route as ReplicateRouteImport } from './routes/replicate'
-import { Route as SecurityRouteImport } from './routes/security'
+import { Route as LoophubRouteImport } from './routes/loophub'
 import { Route as StormRouteImport } from './routes/storm'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,44 +25,14 @@ const CommandRoute = CommandRouteImport.update({
   path: '/command',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EvidenceRoute = EvidenceRouteImport.update({
-  id: '/evidence',
-  path: '/evidence',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HardwareRoute = HardwareRouteImport.update({
-  id: '/hardware',
-  path: '/hardware',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HubTwinRoute = HubTwinRouteImport.update({
-  id: '/hub-twin',
-  path: '/hub-twin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ImpactRoute = ImpactRouteImport.update({
   id: '/impact',
   path: '/impact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InnovationRoute = InnovationRouteImport.update({
-  id: '/innovation',
-  path: '/innovation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoopsRoute = LoopsRouteImport.update({
-  id: '/loops',
-  path: '/loops',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReplicateRoute = ReplicateRouteImport.update({
-  id: '/replicate',
-  path: '/replicate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SecurityRoute = SecurityRouteImport.update({
-  id: '/security',
-  path: '/security',
+const LoophubRoute = LoophubRouteImport.update({
+  id: '/loophub',
+  path: '/loophub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StormRoute = StormRouteImport.update({
@@ -80,96 +44,38 @@ const StormRoute = StormRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/command': typeof CommandRoute
-  '/evidence': typeof EvidenceRoute
-  '/hardware': typeof HardwareRoute
-  '/hub-twin': typeof HubTwinRoute
   '/impact': typeof ImpactRoute
-  '/innovation': typeof InnovationRoute
-  '/loops': typeof LoopsRoute
-  '/replicate': typeof ReplicateRoute
-  '/security': typeof SecurityRoute
+  '/loophub': typeof LoophubRoute
   '/storm': typeof StormRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/command': typeof CommandRoute
-  '/evidence': typeof EvidenceRoute
-  '/hardware': typeof HardwareRoute
-  '/hub-twin': typeof HubTwinRoute
   '/impact': typeof ImpactRoute
-  '/innovation': typeof InnovationRoute
-  '/loops': typeof LoopsRoute
-  '/replicate': typeof ReplicateRoute
-  '/security': typeof SecurityRoute
+  '/loophub': typeof LoophubRoute
   '/storm': typeof StormRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/command': typeof CommandRoute
-  '/evidence': typeof EvidenceRoute
-  '/hardware': typeof HardwareRoute
-  '/hub-twin': typeof HubTwinRoute
   '/impact': typeof ImpactRoute
-  '/innovation': typeof InnovationRoute
-  '/loops': typeof LoopsRoute
-  '/replicate': typeof ReplicateRoute
-  '/security': typeof SecurityRoute
+  '/loophub': typeof LoophubRoute
   '/storm': typeof StormRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/command'
-    | '/evidence'
-    | '/hardware'
-    | '/hub-twin'
-    | '/impact'
-    | '/innovation'
-    | '/loops'
-    | '/replicate'
-    | '/security'
-    | '/storm'
+  fullPaths: '/' | '/command' | '/impact' | '/loophub' | '/storm'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/command'
-    | '/evidence'
-    | '/hardware'
-    | '/hub-twin'
-    | '/impact'
-    | '/innovation'
-    | '/loops'
-    | '/replicate'
-    | '/security'
-    | '/storm'
-  id:
-    | '__root__'
-    | '/'
-    | '/command'
-    | '/evidence'
-    | '/hardware'
-    | '/hub-twin'
-    | '/impact'
-    | '/innovation'
-    | '/loops'
-    | '/replicate'
-    | '/security'
-    | '/storm'
+  to: '/' | '/command' | '/impact' | '/loophub' | '/storm'
+  id: '__root__' | '/' | '/command' | '/impact' | '/loophub' | '/storm'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommandRoute: typeof CommandRoute
-  EvidenceRoute: typeof EvidenceRoute
-  HardwareRoute: typeof HardwareRoute
-  HubTwinRoute: typeof HubTwinRoute
   ImpactRoute: typeof ImpactRoute
-  InnovationRoute: typeof InnovationRoute
-  LoopsRoute: typeof LoopsRoute
-  ReplicateRoute: typeof ReplicateRoute
-  SecurityRoute: typeof SecurityRoute
+  LoophubRoute: typeof LoophubRoute
   StormRoute: typeof StormRoute
 }
 
@@ -189,27 +95,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommandRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/evidence': {
-      id: '/evidence'
-      path: '/evidence'
-      fullPath: '/evidence'
-      preLoaderRoute: typeof EvidenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hardware': {
-      id: '/hardware'
-      path: '/hardware'
-      fullPath: '/hardware'
-      preLoaderRoute: typeof HardwareRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hub-twin': {
-      id: '/hub-twin'
-      path: '/hub-twin'
-      fullPath: '/hub-twin'
-      preLoaderRoute: typeof HubTwinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/impact': {
       id: '/impact'
       path: '/impact'
@@ -217,32 +102,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImpactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/innovation': {
-      id: '/innovation'
-      path: '/innovation'
-      fullPath: '/innovation'
-      preLoaderRoute: typeof InnovationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/loops': {
-      id: '/loops'
-      path: '/loops'
-      fullPath: '/loops'
-      preLoaderRoute: typeof LoopsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/replicate': {
-      id: '/replicate'
-      path: '/replicate'
-      fullPath: '/replicate'
-      preLoaderRoute: typeof ReplicateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/security': {
-      id: '/security'
-      path: '/security'
-      fullPath: '/security'
-      preLoaderRoute: typeof SecurityRouteImport
+    '/loophub': {
+      id: '/loophub'
+      path: '/loophub'
+      fullPath: '/loophub'
+      preLoaderRoute: typeof LoophubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/storm': {
@@ -258,14 +122,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommandRoute: CommandRoute,
-  EvidenceRoute: EvidenceRoute,
-  HardwareRoute: HardwareRoute,
-  HubTwinRoute: HubTwinRoute,
   ImpactRoute: ImpactRoute,
-  InnovationRoute: InnovationRoute,
-  LoopsRoute: LoopsRoute,
-  ReplicateRoute: ReplicateRoute,
-  SecurityRoute: SecurityRoute,
+  LoophubRoute: LoophubRoute,
   StormRoute: StormRoute,
 }
 export const routeTree = rootRouteImport
