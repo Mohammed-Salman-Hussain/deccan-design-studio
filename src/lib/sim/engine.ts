@@ -114,9 +114,11 @@ export interface HubPoint {
 const cache = new Map<string, HubPoint[]>();
 
 export function simulateHubDay(hub: Hub, s: Scenario, withLoop: boolean): HubPoint[] {
-  const key = `${hub.id}|${hub.flats}|${hub.solarKwp}|${hub.pits}|${hub.biogasKgDay}|${hub.stpKLD}|${s}|${withLoop ? 1 : 0}`;
+  // Every hub field the day depends on is in the key, because the Policy Sandbox runs edited copies of a hub under the same id.
+  const key = `${hub.id}|${hub.flats}|${hub.solarKwp}|${hub.pits}|${hub.biogasKgDay}|${hub.stpKLD}|${hub.segregation}|${hub.roofM2}|${hub.ohtKL}|${hub.sumpKL}|${s}|${withLoop ? 1 : 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
+  if (cache.size > 600) cache.clear();
 
   const dt = STEP_MIN / 60;
   const cap = hub.ohtKL * 1000;

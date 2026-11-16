@@ -11,6 +11,7 @@ import { AnimatedNumber } from "@/components/ll/AnimatedNumber";
 import { InfoTip, Meter, PageHeader, Panel, Stat, Term } from "@/components/ll/primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Evidence } from "@/components/platform/Evidence";
+import { PolicySandbox } from "@/components/impact/PolicySandbox";
 import { LensSwitch } from "@/components/ll/LensSwitch";
 
 export const Route = createFileRoute("/impact")({
@@ -55,6 +56,7 @@ function ImpactPage() {
       <Tabs defaultValue="today">
         <TabsList className="mb-3">
           <TabsTrigger value="today">Today</TabsTrigger>
+          <TabsTrigger value="whatif">What if</TabsTrigger>
           <TabsTrigger value="evidence">Evidence</TabsTrigger>
         </TabsList>
 
@@ -161,6 +163,7 @@ function ImpactPage() {
         </section>
         </TabsContent>
 
+        <TabsContent value="whatif"><PolicySandbox key={loc.id} /></TabsContent>
         <TabsContent value="evidence"><Evidence /></TabsContent>
       </Tabs>
     </div>
