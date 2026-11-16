@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
-import { Truck, Gauge, Droplets, Send, CheckCheck, ShieldCheck, Map as MapIcon, ListOrdered, Layers, Inbox, Clock, User, FileDown } from "lucide-react";
+import { Truck, Gauge, Send, CheckCheck, ShieldCheck, Map as MapIcon, ListOrdered, Layers, Inbox, Clock, User, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/store/app";
 import { useActionQueue, useClearedDrains, useLocality, useLocalitySummary, useStepClock, useT, fmtL } from "@/lib/hooks";
@@ -58,13 +58,13 @@ export function OfficerView() {
     const m: MapMarker[] = loc.landmarks.map((l) => ({ id: `lm-${l.name}`, lat: l.lat, lng: l.lng, color: "", label: l.name, shape: "label" as const }));
     for (const hs of sum.hubs) {
       const color = hs.score >= 65 ? "var(--success)" : hs.score >= 45 ? "var(--warning)" : "var(--destructive)";
-      m.push({ id: hs.hub.id, lat: hs.hub.lat, lng: hs.hub.lng, color, shape: "hub", size: 12, html: String(Math.round(hs.score)), label: hs.hub.name, popup: `<strong>${hs.hub.name}</strong><br/>${hs.hub.flats} flats · ${hs.hub.area}<br/>Loop Score ${hs.score.toFixed(0)} · Tank ${hs.now.tankPct.toFixed(0)}%<br/>Solar ${hs.now.solarKW.toFixed(1)} kW · Pump ${hs.now.pumpOn ? "on (" + hs.now.pumpSource + ")" : "off"}` });
+      m.push({ id: hs.hub.id, lat: hs.hub.lat, lng: hs.hub.lng, color, shape: "hub", size: 11, text: String(Math.round(hs.score)), label: hs.hub.name, detail: { title: hs.hub.name, lines: [`${hs.hub.flats} flats · ${hs.hub.area}`, `Loop Score ${hs.score.toFixed(0)} · Tank ${hs.now.tankPct.toFixed(0)}%`, `Solar ${hs.now.solarKW.toFixed(1)} kW · Pump ${hs.now.pumpOn ? "on (" + hs.now.pumpSource + ")" : "off"}`] } });
     }
     for (const { d, r } of drains) {
-      m.push({ id: d.id, lat: d.lat, lng: d.lng, color: riskColor(r), shape: "drain", size: 11, pulse: r >= 75, label: `${d.id} ${d.name}`, popup: `<strong>${d.id} · ${d.name}</strong><br/>Clog risk ${r}%${cleared.has(d.id) ? " · cleared" : ""}<br/>Width ${d.widthM} m of ${d.designWidthM} m` });
+      m.push({ id: d.id, lat: d.lat, lng: d.lng, color: riskColor(r), shape: "drain", size: 11, pulse: r >= 75, label: `${d.id} ${d.name}`, detail: { title: `${d.id} · ${d.name}`, lines: [`Clog risk ${r}%${cleared.has(d.id) ? " · cleared" : ""}`, `Width ${d.widthM} m of ${d.designWidthM} m`] } });
     }
     for (const a of queue.filter((q) => q.status === "dispatched")) {
-      m.push({ id: `task-${a.id}`, lat: a.lat, lng: a.lng, color: LOOP_BY_ID[a.loop].color, shape: "dot", size: 8, pulse: true, label: a.title, popup: `<strong>${a.title}</strong><br/>${a.assignee} · due ${a.deadline}` });
+      m.push({ id: `task-${a.id}`, lat: a.lat, lng: a.lng, color: LOOP_BY_ID[a.loop].color, shape: "dot", size: 8, pulse: true, label: a.title, detail: { title: a.title, lines: [`${a.assignee} · due ${a.deadline}`] } });
     }
     return m;
   }, [loc, sum.hubs, drains, queue, cleared]);
@@ -97,10 +97,9 @@ export function OfficerView() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3">
         <Stat label={t("kpi.score")} icon={Gauge} color="var(--primary-glow)" value={<AnimatedNumber value={sum.score} decimals={1} />} hint="Flat-weighted mean of all hub loop scores, plus a bonus for completed field tasks." />
-        <Stat label={t("kpi.tankers")} icon={Truck} color="var(--loop-save)" value={<AnimatedNumber value={sum.tankersAvoided} decimals={1} />} hint="(extra reuse + pit top-up + 25% of recharge + shortage avoided) ÷ 5,000 L" />
-        <Stat label="Water reused" icon={Droplets} color="var(--loop-rain)" value={<span className="tabular">{fmtL(sum.rechargeL + sum.reuseL)}</span>} sub={`${fmtL(sum.rechargeL)} rain · ${fmtL(sum.reuseL)} treated`} hint="Roof runoff sent to pits plus treated water reused on site or topped into pits." />
+        <Stat label={t("kpi.tankers")} icon={Truck} color="var(--loop-save)" value={<AnimatedNumber value={sum.tankersAvoided} decimals={1} />} hint={`(extra reuse + pit top-up + 25% of recharge + shortage avoided) ÷ 5,000 L. Water reused so far: ${fmtL(sum.rechargeL + sum.reuseL)}.`} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
@@ -129,7 +128,7 @@ export function OfficerView() {
           }
         >
           <div className="h-[340px] overflow-hidden rounded-lg border md:h-[420px]">
-            <LocalityMap center={loc.center} zoom={loc.zoom} markers={markers} circles={circles} ariaLabel={`Map of ${loc.name} with hubs and drains`} />
+            <LocalityMap fit center={loc.center} zoom={loc.zoom} markers={markers} circles={circles} ariaLabel={`Map of ${loc.name} with hubs and drains`} />
           </div>
         </Panel>
 

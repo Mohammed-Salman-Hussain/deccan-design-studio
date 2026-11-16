@@ -9,17 +9,13 @@ import { Logo } from "@/components/ll/LoopRing";
 import { ClockControl, IconButtons, LocalityHubSelect, ScenarioSwitch } from "./Controls";
 import { AssumptionsSheet } from "./AssumptionsSheet";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { useLocality, useT } from "@/lib/hooks";
+import { useT } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 function Hydrator() {
   const reduce = useApp((s) => s.reduceMotion);
-  const theme = useApp((s) => s.theme);
-  useEffect(() => {
-    document.documentElement.classList.toggle("light", theme === "light");
-  }, [theme]);
   useEffect(() => {
     Promise.resolve(useApp.persist.rehydrate()).then(() => useApp.setState({ hydrated: true }));
   }, []);
@@ -71,19 +67,6 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function SidebarFooter() {
-  const loc = useLocality();
-  return (
-    <div className="m-3 rounded-xl border bg-card/60 p-3">
-      <p className="flex items-center gap-2 text-xs font-medium">
-        <span className="relative flex size-2"><span className="absolute inset-0 animate-ping rounded-full bg-success/60" /><span className="relative size-2 rounded-full bg-success" /></span>
-        Live · {loc.name}
-      </p>
-      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{loc.hubs.length} hubs and {loc.drains.length} drains in this neighbourhood layer.</p>
-    </div>
-  );
-}
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const path = useRouterState({ select: (r) => r.location.pathname });
@@ -93,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Hydrator />
       <ClockDriver />
 
-      <div className="aurora flex min-h-dvh w-full">
+      <div className="flex min-h-dvh w-full">
         <aside className="sticky top-0 hidden h-dvh w-52 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
           <div className="flex h-12 items-center px-4">
             <Link to="/" aria-label="LoopLocal home">
@@ -104,11 +87,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p className="mb-2 px-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Workspace</p>
             <NavList />
           </div>
-          <SidebarFooter />
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+          <header className="sticky top-0 z-40 border-b bg-card">
             <div className="flex h-12 items-center gap-2 overflow-x-auto px-3 no-scrollbar md:px-4">
               <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="grid size-9 shrink-0 place-items-center rounded-lg border lg:hidden">
                 <Menu className="size-4" />
