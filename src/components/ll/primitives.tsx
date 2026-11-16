@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useT } from "@/lib/hooks";
+import { useApp } from "@/store/app";
+import { GLOSSARY, type GlossaryKey } from "@/lib/glossary";
 
 /**
  * A small "i" button that keeps secondary detail out of the way.
@@ -20,6 +22,22 @@ export function InfoTip({ children, label = "More information", className, side 
         </button>
       </PopoverTrigger>
       <PopoverContent side={side} className="w-72 text-xs leading-relaxed text-muted-foreground">{children}</PopoverContent>
+    </Popover>
+  );
+}
+
+/** A word in running text with a dotted underline. Tap or hover to see what it means. */
+export function Term({ k, children }: { k: GlossaryKey; children?: React.ReactNode }) {
+  const g = GLOSSARY[k];
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" className="cursor-help rounded-sm underline decoration-dotted decoration-muted-foreground/70 underline-offset-2 hover:text-primary-glow">{children ?? g.label}</button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 text-xs leading-relaxed">
+        <p className="font-medium text-foreground">{g.label}</p>
+        <p className="mt-1 text-muted-foreground">{g.def}</p>
+      </PopoverContent>
     </Popover>
   );
 }
@@ -89,7 +107,12 @@ export function Stat({ label, value, sub, icon: Icon, color, hint, className }: 
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
           {label}
-          {hint && <InfoTip label={`How ${label} is calculated`}>{hint}</InfoTip>}
+          {hint && (
+            <InfoTip label={`How ${label} is calculated`}>
+              <p>{hint}</p>
+              <button type="button" onClick={() => useApp.getState().set({ assumptionsOpen: true })} className="mt-2 font-medium text-primary-glow underline underline-offset-2">All assumptions and formulas</button>
+            </InfoTip>
+          )}
         </span>
         {Icon && <Icon className="size-4" style={{ color: color ?? "var(--primary-glow)" }} aria-hidden />}
       </div>

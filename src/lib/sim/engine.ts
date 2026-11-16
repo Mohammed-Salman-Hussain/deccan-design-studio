@@ -249,9 +249,47 @@ export interface HubSummary {
   savingsRs: number;
   scores: Record<LoopId, number>;
   score: number;
+  /** The same day with no coordination, for the With / Without view. */
+  base: BaseSummary;
+}
+
+/** Headline numbers for a day without LoopLocal: pits mostly closed, no top-ups, little biogas feed. */
+export interface BaseSummary {
+  scores: Record<LoopId, number>;
+  score: number;
+  tankersAvoided: number;
+  kwhShifted: number;
+  rechargeL: number;
+  reuseL: number;
+  wasteDivertedKg: number;
+  solarKWh: number;
+  savingsRs: number;
+  streetL: number;
+  shortageL: number;
 }
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+interface ScoreInputs {
+  generated: number; diverted: number; renew: number; pumpTot: number; runoff: number; recharge: number;
+  treated: number; reuse: number; topup: number; surplus: number; peakB: number; kwhShifted: number; tankersAvoided: number;
+}
+
+function loopScores(hub: Hub, t: ScoreInputs): Record<LoopId, number> {
+  const wasteScore = hub.biogasKgDay > 0 ? hub.segregation * 0.45 + (t.generated > 0 ? (t.diverted / t.generated) * 55 : 40) : hub.segregation * 0.45;
+  const solarScore = hub.solarKwp > 0 ? 25 + (t.pumpTot > 0 ? (t.renew / t.pumpTot) * 75 : 50) : 12;
+  const readiness = hub.pits > 0 ? Math.min(100, 45 + hub.pits * 15) : 18;
+  const rainScore = t.runoff > 0 ? readiness * 0.4 + (t.recharge / t.runoff) * 60 * (hub.pits > 0 ? 1 : 0) + (hub.pits > 0 ? 25 : 0) : readiness;
+  const reuseScore = hub.stpKLD > 0 ? (t.treated > 0 ? ((t.reuse + t.topup + t.surplus * (hub.stpRegistered ? 1 : 0.35)) / t.treated) * 85 : 50) + (hub.stpRegistered ? 15 : 0) : 10;
+  const saveScore = 30 + (t.peakB > 0 ? (t.kwhShifted / t.peakB) * 45 : 20) + Math.min(25, t.tankersAvoided * 8);
+  return {
+    waste: clamp(wasteScore, 0, 100),
+    solar: clamp(solarScore, 0, 100),
+    rain: clamp(rainScore, 0, 100),
+    reuse: clamp(reuseScore, 0, 100),
+    save: clamp(saveScore, 0, 100),
+  };
+}
 
 export function summarizeHub(hub: Hub, s: Scenario, tMin: number): HubSummary {
   const loop = simulateHubDay(hub, s, true);
@@ -278,27 +316,38 @@ export function summarizeHub(hub: Hub, s: Scenario, tMin: number): HubSummary {
   const tankersAvoided = Math.max(0, (reuse - reuseB + topup + recharge * 0.25 + Math.max(0, shortB - short)) / TANKER_L);
   const savingsRs = kwhShifted * (TARIFF_RS + PEAK_SURCHARGE_RS) + solarKWh * TARIFF_RS + tankersAvoided * TANKER_RS;
 
-  const wasteScore = hub.biogasKgDay > 0 ? hub.segregation * 0.45 + (generated > 0 ? (diverted / generated) * 55 : 40) : hub.segregation * 0.45;
-  const solarScore = hub.solarKwp > 0 ? 25 + (pumpTot > 0 ? (renew / pumpTot) * 75 : 50) : 12;
-  const readiness = hub.pits > 0 ? Math.min(100, 45 + hub.pits * 15) : 18;
-  const rainScore = runoff > 0 ? readiness * 0.4 + (recharge / runoff) * 60 * (hub.pits > 0 ? 1 : 0) + (hub.pits > 0 ? 25 : 0) : readiness;
-  const reuseScore = hub.stpKLD > 0 ? (treated > 0 ? ((reuse + topup + surplus * (hub.stpRegistered ? 1 : 0.35)) / treated) * 85 : 50) + (hub.stpRegistered ? 15 : 0) : 10;
-  const saveScore = 30 + (peakB > 0 ? (kwhShifted / peakB) * 45 : 20) + Math.min(25, tankersAvoided * 8);
-  const scores: Record<LoopId, number> = {
-    waste: clamp(wasteScore, 0, 100),
-    solar: clamp(solarScore, 0, 100),
-    rain: clamp(rainScore, 0, 100),
-    reuse: clamp(reuseScore, 0, 100),
-    save: clamp(saveScore, 0, 100),
-  };
+  const scores = loopScores(hub, { generated, diverted, renew, pumpTot, runoff, recharge, treated, reuse, topup, surplus, peakB, kwhShifted, tankersAvoided });
   const score = (scores.waste + scores.solar + scores.rain + scores.reuse + scores.save) / 5;
+
+  // The same day with no coordination: the series the engine already runs with the loops off.
+  let bGen = 0, bDiv = 0, bRenew = 0, bPump = 0, bRun = 0, bRech = 0, bTreated = 0, bReuse = 0, bTopup = 0, bSurplus = 0, bSolar = 0, bStreet = 0, bShort = 0;
+  for (let i = 0; i <= idx; i++) {
+    const b = base[i];
+    bGen += b.wasteGeneratedKg; bDiv += b.wasteDivertedKg; bRenew += b.renewablePumpKWh; bPump += b.pumpKWh;
+    bRun += b.runoffL; bRech += b.rechargeL; bTreated += b.treatedL; bReuse += b.reuseL; bTopup += b.pitTopupL; bSurplus += b.surplusL;
+    bSolar += Math.min(b.solarKW, b.loadKW) * dt; bStreet += b.streetL; bShort += b.shortageL;
+  }
+  const bScores = loopScores(hub, { generated: bGen, diverted: bDiv, renew: bRenew, pumpTot: bPump, runoff: bRun, recharge: bRech, treated: bTreated, reuse: bReuse, topup: bTopup, surplus: bSurplus, peakB, kwhShifted: 0, tankersAvoided: 0 });
+  const baseline: BaseSummary = {
+    scores: bScores,
+    score: (bScores.waste + bScores.solar + bScores.rain + bScores.reuse + bScores.save) / 5,
+    tankersAvoided: 0,
+    kwhShifted: 0,
+    rechargeL: bRech,
+    reuseL: bReuse + bTopup,
+    wasteDivertedKg: bDiv,
+    solarKWh: bSolar,
+    savingsRs: bSolar * TARIFF_RS,
+    streetL: bStreet,
+    shortageL: bShort,
+  };
 
   return {
     hub, now: loop[idx], solarKWh, biogasKWh, gridKWh, peakKWhLoop: peakL, peakKWhBase: peakB, kwhShifted,
     rechargeL: recharge, runoffL: runoff, streetL: street, streetBaseL: streetB, reuseL: reuse, pitTopupL: topup,
     surplusL: surplus, treatedL: treated, wasteDivertedKg: diverted, wasteGeneratedKg: generated,
     shortageL: short, shortageBaseL: shortB, outageHours: outH, outageCoveredHours: covH, outageCoveredBaseHours: covBH,
-    tankersAvoided, savingsRs, scores, score,
+    tankersAvoided, savingsRs, scores, score, base: baseline,
   };
 }
 
@@ -318,6 +367,7 @@ export interface LocalitySummary {
   streetBaseL: number;
   shortageL: number;
   shortageBaseL: number;
+  base: BaseSummary;
 }
 
 export function summarizeLocality(loc: Locality, s: Scenario, tMin: number, bonus = 0): LocalitySummary {
@@ -345,6 +395,25 @@ export function summarizeLocality(loc: Locality, s: Scenario, tMin: number, bonu
     streetBaseL: sum((h) => h.streetBaseL),
     shortageL: sum((h) => h.shortageL),
     shortageBaseL: sum((h) => h.shortageBaseL),
+    base: localityBase(hubs, keys, totalFlats),
+  };
+}
+
+function localityBase(hubs: HubSummary[], keys: LoopId[], totalFlats: number): BaseSummary {
+  const scores = Object.fromEntries(keys.map((k) => [k, hubs.reduce((a, h) => a + h.base.scores[k] * h.hub.flats, 0) / totalFlats])) as Record<LoopId, number>;
+  const sum = (f: (b: BaseSummary) => number) => hubs.reduce((a, h) => a + f(h.base), 0);
+  return {
+    scores,
+    score: keys.reduce((a, k) => a + scores[k], 0) / keys.length,
+    tankersAvoided: 0,
+    kwhShifted: 0,
+    rechargeL: sum((b) => b.rechargeL),
+    reuseL: sum((b) => b.reuseL),
+    wasteDivertedKg: sum((b) => b.wasteDivertedKg),
+    solarKWh: sum((b) => b.solarKWh),
+    savingsRs: sum((b) => b.savingsRs),
+    streetL: sum((b) => b.streetL),
+    shortageL: sum((b) => b.shortageL),
   };
 }
 
@@ -395,13 +464,14 @@ export function hourlySeries(hub: Hub, s: Scenario, withLoop: boolean) {
   return rows;
 }
 
-export function localityHourly(loc: Locality, s: Scenario) {
+export function localityHourly(loc: Locality, s: Scenario, withLoop = true) {
   const per = loc.hubs.map((h) => ({ loop: hourlySeries(h, s, true), base: hourlySeries(h, s, false) }));
   return Array.from({ length: 24 }, (_, i) => {
     const r = { hour: per[0].loop[i].hour, solar: 0, grid: 0, gridBase: 0, recharge: 0, reuse: 0, rain: weatherAt(s, i + 0.5).rainMm, tank: 0, tankBase: 0, biogas: 0 };
     for (const p of per) {
-      r.solar += p.loop[i].solar; r.grid += p.loop[i].grid; r.gridBase += p.base[i].grid; r.recharge += p.loop[i].recharge;
-      r.reuse += p.loop[i].reuse; r.tank += p.loop[i].tank / per.length; r.tankBase += p.base[i].tank / per.length; r.biogas += p.loop[i].biogas;
+      const cur = withLoop ? p.loop[i] : p.base[i];
+      r.solar += cur.solar; r.grid += cur.grid; r.gridBase += p.base[i].grid; r.recharge += cur.recharge;
+      r.reuse += cur.reuse; r.tank += cur.tank / per.length; r.tankBase += p.base[i].tank / per.length; r.biogas += cur.biogas;
     }
     return { ...r, solar: +r.solar.toFixed(1), grid: +r.grid.toFixed(1), gridBase: +r.gridBase.toFixed(1), tank: Math.round(r.tank), tankBase: Math.round(r.tankBase), rain: +r.rain.toFixed(1), biogas: +r.biogas.toFixed(1) };
   });
