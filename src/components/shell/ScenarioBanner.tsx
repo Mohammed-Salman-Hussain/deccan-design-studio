@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { CloudLightning, Thermometer, Zap, X, ArrowRight, Droplets, PowerOff } from "lucide-react";
 import { useApp } from "@/store/app";
 import { useLocality } from "@/lib/hooks";
@@ -25,6 +25,7 @@ export function ScenarioBanner() {
   const setScenario = useApp((s) => s.setScenario);
   const set = useApp((s) => s.set);
   const loc = useLocality();
+  const path = useRouterState({ select: (r) => r.location.pathname });
   const extra = useMemo(() => {
     if (scenario === "normal") return 0;
     const base = new Set(generateActions(loc, "normal").map((a) => a.id));
@@ -37,7 +38,7 @@ export function ScenarioBanner() {
 
   return (
     <AnimatePresence initial={false}>
-      {scenario !== "normal" && (
+      {scenario !== "normal" && path !== "/storm" && (
         <motion.div
           key={scenario}
           initial={{ height: 0, opacity: 0 }}

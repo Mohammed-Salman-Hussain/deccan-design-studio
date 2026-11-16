@@ -148,20 +148,12 @@ export function LangSwitch() {
 /** Notifications, plus one menu for the things most people touch rarely. */
 export function IconButtons() {
   const set = useApp((s) => s.set);
-  const theme = useApp((s) => s.theme);
   const notices = useApp((s) => s.notices);
   const markRead = useApp((s) => s.markNoticesRead);
   const resetDemo = useApp((s) => s.resetDemo);
   const unread = notices.filter((n) => !n.read).length;
   return (
     <div className="flex items-center gap-1">
-      <button
-        onClick={() => set({ theme: theme === "dark" ? "light" : "dark" })}
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        className="grid size-9 place-items-center rounded-lg border bg-card hover:bg-accent"
-      >
-        {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-      </button>
       <Popover onOpenChange={(o) => !o && markRead()}>
         <PopoverTrigger asChild>
           <button aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`} className="relative grid size-9 place-items-center rounded-lg border bg-card hover:bg-accent">
