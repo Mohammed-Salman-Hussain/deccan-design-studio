@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/loophub")({
   head: () => ({
     meta: [
-      { title: "Hub Twin — LoopLocal" },
+      { title: "LoopHub — LoopLocal" },
       { name: "description", content: "A cross-section of one apartment complex: solar roof, kitchens, biogas, pumps, tanks, STP and recharge pit, animated through a day in its life." },
-      { property: "og:title", content: "Hub Twin — LoopLocal" },
+      { property: "og:title", content: "LoopHub — LoopLocal" },
       { property: "og:description", content: "Watch one Loop Hub run a day, with and without LoopLocal." },
     ],
   }),
@@ -92,7 +92,7 @@ function HubTwinPage() {
 
   return (
     <div className="mx-auto max-w-[1500px]">
-      <PageHeader title="Hub Twin" description={`A day in the life of ${hub.name} (${hub.flats} flats). Drag the timeline or jump to a moment. Flows, tank level and the outage state update with the hub's own numbers.`}>
+      <PageHeader title="LoopHub" description={`A day in the life of ${hub.name} (${hub.flats} flats). Drag the timeline or jump to a moment. Flows, tank level and the outage state update with the hub's own numbers.`}>
         <div className="inline-flex rounded-lg border p-0.5" role="group" aria-label="Compare with and without LoopLocal">
           <Button size="sm" variant={withLoop ? "soft" : "ghost"} aria-pressed={withLoop} onClick={() => setWithLoop(true)}>With LoopLocal</Button>
           <Button size="sm" variant={!withLoop ? "soft" : "ghost"} aria-pressed={!withLoop} onClick={() => setWithLoop(false)}>Without</Button>
@@ -105,7 +105,7 @@ function HubTwinPage() {
             <svg viewBox="0 0 960 545" className="h-auto w-full" role="img" aria-label={`Cross-section of ${hub.name} at ${formatClock(clock)}. Tank ${Math.round(p.tankPct)} percent. ${p.outage ? "Grid outage in progress." : "Grid supply on."}`}>
               <defs>
                 <linearGradient id="twin-sky" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={night ? "#2B3A5E" : w.cloud > 0.6 ? "#C9D6E6" : "#BEDEFF"} />
+                  <stop offset="0%" stopColor={night ? "var(--scene-sky-night)" : w.cloud > 0.6 ? "var(--scene-sky-cloud)" : "var(--scene-sky-day)"} />
                   <stop offset="100%" stopColor="var(--background)" />
                 </linearGradient>
                 <linearGradient id="twin-water" x1="0" y1="0" x2="0" y2="1">
@@ -117,7 +117,7 @@ function HubTwinPage() {
               {!night && <circle cx="110" cy="70" r={26} fill="var(--loop-solar)" opacity={Math.max(0.15, 1 - w.cloud)} />}
               {night && <circle cx="110" cy="70" r={16} fill="var(--cream)" opacity={0.7} />}
               {w.cloud > 0.4 && (
-                <g fill="#ffffff" opacity={Math.min(0.95, w.cloud)}>
+                <g fill="var(--scene-cloud)" opacity={Math.min(0.95, w.cloud)}>
                   <ellipse cx="180" cy="60" rx="52" ry="16" /><ellipse cx="220" cy="48" rx="40" ry="14" /><ellipse cx="740" cy="52" rx="60" ry="17" /><ellipse cx="790" cy="42" rx="40" ry="13" />
                 </g>
               )}
@@ -129,7 +129,7 @@ function HubTwinPage() {
                 </g>
               )}
               {/* ground */}
-              <rect y="440" width="960" height="105" fill="#C9DDF5" />
+              <rect y="440" width="960" height="105" fill="var(--scene-ground)" />
               <rect y="438" width="960" height="4" fill="var(--loop-waste)" opacity="0.35" />
 
               {/* building */}
@@ -137,7 +137,7 @@ function HubTwinPage() {
               <rect x="330" y="122" width="300" height="9" rx="2" fill="var(--muted)" />
               {Array.from({ length: 5 }, (_, f) =>
                 Array.from({ length: 4 }, (_, c) => (
-                  <rect key={`${f}-${c}`} x={362 + c * 62} y={142 + f * 58} width={38} height={34} rx={3} fill={windowsLit ? (((f * 3 + c * 5) % 7) > 1 ? "#FFF2A7" : "#7FA6D4") : "#5D7AA3"} opacity={windowsLit ? 0.9 : 0.7} />
+                  <rect key={`${f}-${c}`} x={362 + c * 62} y={142 + f * 58} width={38} height={34} rx={3} fill={windowsLit ? (((f * 3 + c * 5) % 7) > 1 ? "var(--scene-window-lit)" : "var(--scene-window)") : "var(--scene-window-off)"} opacity={windowsLit ? 0.9 : 0.7} />
                 )),
               )}
               {/* kitchens band */}
