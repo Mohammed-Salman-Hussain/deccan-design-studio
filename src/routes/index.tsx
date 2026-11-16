@@ -29,7 +29,7 @@ const WHY = [
   "A single rain and wind spell cut power for 5–6 hours across 20+ colonies.",
   "With no power there is no pumping, so water supply stops.",
   "The IDL nala has narrowed from about 7 m to 2 m; clogged nalas flood streets.",
-  "Tanker bookings in Kukatpally later jumped about 185% year on year.",
+  "Tanker bookings in Kukatpally then rose 185% in October.",
   "Only about 0.95% of Hyderabad's rain soaks into the ground.",
 ];
 
