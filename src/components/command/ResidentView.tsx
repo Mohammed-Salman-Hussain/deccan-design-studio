@@ -8,6 +8,9 @@ import { useHub, useHubSummary, useLocality, useStepClock, useT, fmtL, fmtRs, us
 import { formatHour, hourlySeries, SCENARIO_BY_ID } from "@/lib/sim/engine";
 import { hubPlan, type PlanItem } from "@/lib/sim/plan";
 import { Panel, Stat } from "@/components/ll/primitives";
+import { Credits } from "./Credits";
+import { MonsoonShare } from "./MonsoonShare";
+import { suggestMatch, MATCH_BONUS } from "@/lib/credits";
 
 import { TankGauge } from "./TankGauge";
 import { LocalityMap } from "@/components/map/LocalityMap";
@@ -109,6 +112,7 @@ export function ResidentView() {
       <Tabs defaultValue="chart">
         <TabsList>
           <TabsTrigger value="chart">Tank today</TabsTrigger>
+          <TabsTrigger value="monsoon">Monsoon</TabsTrigger>
           <TabsTrigger value="report">Report</TabsTrigger>
           <TabsTrigger value="share">Share</TabsTrigger>
           <TabsTrigger value="waste">Waste</TabsTrigger>
@@ -133,8 +137,9 @@ export function ResidentView() {
             </ResponsiveContainer>
           </Panel>
         </TabsContent>
+        <TabsContent value="monsoon" className="mt-3"><MonsoonShare /></TabsContent>
         <TabsContent value="report" className="mt-3"><ReportIssue /></TabsContent>
-        <TabsContent value="share" className="mt-3"><SurplusCard /></TabsContent>
+        <TabsContent value="share" className="mt-3 grid gap-4 lg:grid-cols-2"><SurplusCard /><Credits /></TabsContent>
         <TabsContent value="waste" className="mt-3"><SegregationBoard /></TabsContent>
         <TabsContent value="payback" className="mt-3"><PaybackEstimator /></TabsContent>
       </Tabs>
@@ -272,10 +277,31 @@ function SurplusCard() {
   const [res, setRes] = useState<"water" | "biogas" | "solar">("water");
   const [qty, setQty] = useState(10);
   const name = (id?: string) => loc.hubs.find((h) => h.id === id)?.name ?? "Neighbour hub";
+  const suggestion = useMemo(() => suggestMatch(offers, loc.hubs), [offers, loc.hubs]);
   const unit = { water: "kL treated", biogas: "m³/day", solar: "kWh midday" }[res];
   const color = { water: "var(--loop-reuse)", biogas: "var(--loop-waste)", solar: "var(--loop-solar)" };
   return (
     <Panel title="Surplus sharing" subtitle="Hubs share extra treated water, biogas or solar" icon={Share2}>
+      {suggestion && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 p-2.5 text-xs" role="status">
+          <p className="min-w-0 flex-1">
+            <span className="font-medium">Suggested match · </span>
+            {name(suggestion.offer.fromHub)} can cover {name(suggestion.request.fromHub)}'s request for {suggestion.request.qty} {suggestion.request.unit}. {suggestion.km.toFixed(1)} km apart, +{MATCH_BONUS} Loop Credits each.
+          </p>
+          <Button
+            size="sm"
+            variant="hero"
+            className="h-7"
+            onClick={() => {
+              matchOffer(suggestion.offer.id, suggestion.request.fromHub);
+              matchOffer(suggestion.request.id, suggestion.offer.fromHub);
+              toast.success("Matched", { description: `${name(suggestion.offer.fromHub)} and ${name(suggestion.request.fromHub)} each earn ${MATCH_BONUS} Loop Credits.` });
+            }}
+          >
+            Match them
+          </Button>
+        </div>
+      )}
       <ul className="space-y-2">
         {offers.slice(0, 5).map((o) => (
           <li key={o.id} className="flex items-center gap-2 rounded-lg border p-2.5 text-xs">

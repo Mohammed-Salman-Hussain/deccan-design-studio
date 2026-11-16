@@ -11,6 +11,7 @@ import { fmtL, useLocality } from "@/lib/hooks";
 import { generateActions } from "@/lib/sim/actions";
 import { formatClock, localityHourly, summarizeLocality, weatherAt } from "@/lib/sim/engine";
 import { PageHeader } from "@/components/ll/primitives";
+import { MonsoonCard } from "@/components/storm/MonsoonCard";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/storm")({
@@ -299,6 +300,8 @@ function StormPage() {
           </motion.section>
         )}
       </AnimatePresence>
+
+      <div className="mt-5"><MonsoonCard /></div>
     </div>
   );
 }
