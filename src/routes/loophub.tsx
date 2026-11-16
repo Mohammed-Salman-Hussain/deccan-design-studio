@@ -11,7 +11,7 @@ import type { Scenario } from "@/lib/sim/types";
 import { PageHeader, Panel, Stat } from "@/components/ll/primitives";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/hub-twin")({
+export const Route = createFileRoute("/loophub")({
   head: () => ({
     meta: [
       { title: "Hub Twin — LoopLocal" },

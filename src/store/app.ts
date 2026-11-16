@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Action, Lang, Role, Scenario, TaskRecord, TaskStatus } from "@/lib/sim/types";
-import { formatClock } from "@/lib/sim/engine";
+import { formatClock, SCENARIO_BY_ID } from "@/lib/sim/engine";
 import { LOCALITY_BY_ID } from "@/lib/sim/data";
 import { routineTasks } from "@/lib/sim/actions";
 
@@ -50,6 +50,7 @@ interface State {
   role: Role;
   lang: Lang;
   reduceMotion: boolean;
+  theme: "dark" | "light";
   localityId: string;
   hubId: string;
   scenario: Scenario;
@@ -117,6 +118,7 @@ const initial = {
   role: "officer" as Role,
   lang: "en" as Lang,
   reduceMotion: false,
+  theme: "dark" as "dark" | "light",
   localityId: "kukatpally",
   hubId: "H-SSR",
   scenario: "normal" as Scenario,
@@ -146,7 +148,7 @@ export const useApp = create<State>()(
       },
       setScenario: (scenario) => {
         if (get().scenario === scenario) return;
-        set({ scenario });
+        set({ scenario, clock: SCENARIO_BY_ID[scenario].focusMin });
         get().log("You", `Scenario set to ${scenario}`);
       },
       setLocality: (id) => {
@@ -228,7 +230,7 @@ export const useApp = create<State>()(
         if (n) get().log("Field app", `Synced ${n} offline completion${n > 1 ? "s" : ""}`);
       },
       resetDemo: () => {
-        set({ ...initial, hydrated: true, lang: get().lang, tasks: seedTasks("kukatpally") });
+        set({ ...initial, hydrated: true, lang: get().lang, theme: get().theme, tasks: seedTasks("kukatpally") });
       },
     }),
     {
@@ -236,7 +238,7 @@ export const useApp = create<State>()(
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => ({
-        role: s.role, lang: s.lang, reduceMotion: s.reduceMotion, localityId: s.localityId, hubId: s.hubId,
+        role: s.role, lang: s.lang, reduceMotion: s.reduceMotion, theme: s.theme, localityId: s.localityId, hubId: s.hubId,
         scenario: s.scenario, speed: s.speed, tasks: s.tasks, citizenActions: s.citizenActions, notices: s.notices,
         audit: s.audit, reports: s.reports, offers: s.offers, checks: s.checks, offline: s.offline,
       }),

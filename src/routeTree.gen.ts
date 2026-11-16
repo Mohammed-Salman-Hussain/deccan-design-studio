@@ -10,33 +10,73 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommandRouteImport } from './routes/command'
+import { Route as ImpactRouteImport } from './routes/impact'
+import { Route as LoophubRouteImport } from './routes/loophub'
+import { Route as StormRouteImport } from './routes/storm'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommandRoute = CommandRouteImport.update({
+  id: '/command',
+  path: '/command',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpactRoute = ImpactRouteImport.update({
+  id: '/impact',
+  path: '/impact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoophubRoute = LoophubRouteImport.update({
+  id: '/loophub',
+  path: '/loophub',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StormRoute = StormRouteImport.update({
+  id: '/storm',
+  path: '/storm',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/command': typeof CommandRoute
+  '/impact': typeof ImpactRoute
+  '/loophub': typeof LoophubRoute
+  '/storm': typeof StormRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/command': typeof CommandRoute
+  '/impact': typeof ImpactRoute
+  '/loophub': typeof LoophubRoute
+  '/storm': typeof StormRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/command': typeof CommandRoute
+  '/impact': typeof ImpactRoute
+  '/loophub': typeof LoophubRoute
+  '/storm': typeof StormRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/command' | '/impact' | '/loophub' | '/storm'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/command' | '/impact' | '/loophub' | '/storm'
+  id: '__root__' | '/' | '/command' | '/impact' | '/loophub' | '/storm'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommandRoute: typeof CommandRoute
+  ImpactRoute: typeof ImpactRoute
+  LoophubRoute: typeof LoophubRoute
+  StormRoute: typeof StormRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +88,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/command': {
+      id: '/command'
+      path: '/command'
+      fullPath: '/command'
+      preLoaderRoute: typeof CommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impact': {
+      id: '/impact'
+      path: '/impact'
+      fullPath: '/impact'
+      preLoaderRoute: typeof ImpactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loophub': {
+      id: '/loophub'
+      path: '/loophub'
+      fullPath: '/loophub'
+      preLoaderRoute: typeof LoophubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storm': {
+      id: '/storm'
+      path: '/storm'
+      fullPath: '/storm'
+      preLoaderRoute: typeof StormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommandRoute: CommandRoute,
+  ImpactRoute: ImpactRoute,
+  LoophubRoute: LoophubRoute,
+  StormRoute: StormRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

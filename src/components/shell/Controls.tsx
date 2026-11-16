@@ -23,10 +23,10 @@ export function ScenarioSwitch({ className }: { className?: string }) {
       onValueChange={(v) => {
         const next = SCENARIOS.find((s) => s.id === v);
         setScenario(v as Scenario);
-        if (next) toast(t(`scenario.${next.id}`), { description: next.blurb });
+        if (next) toast(t(`scenario.${next.id}`), { description: `${next.blurb} Clock moved to ${formatClock(next.focusMin)} so you can see it happen.` });
       }}
     >
-      <SelectTrigger aria-label="Scenario" className={cn("h-9 w-[150px] shrink-0 rounded-lg bg-card text-sm", className)}>
+      <SelectTrigger aria-label="Conditions" className={cn("h-9 w-[150px] shrink-0 rounded-lg bg-card text-sm", scenario !== "normal" && "border-primary/60", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -148,12 +148,20 @@ export function LangSwitch() {
 /** Notifications, plus one menu for the things most people touch rarely. */
 export function IconButtons() {
   const set = useApp((s) => s.set);
+  const theme = useApp((s) => s.theme);
   const notices = useApp((s) => s.notices);
   const markRead = useApp((s) => s.markNoticesRead);
   const resetDemo = useApp((s) => s.resetDemo);
   const unread = notices.filter((n) => !n.read).length;
   return (
     <div className="flex items-center gap-1">
+      <button
+        onClick={() => set({ theme: theme === "dark" ? "light" : "dark" })}
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        className="grid size-9 place-items-center rounded-lg border bg-card hover:bg-accent"
+      >
+        {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      </button>
       <Popover onOpenChange={(o) => !o && markRead()}>
         <PopoverTrigger asChild>
           <button aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`} className="relative grid size-9 place-items-center rounded-lg border bg-card hover:bg-accent">
