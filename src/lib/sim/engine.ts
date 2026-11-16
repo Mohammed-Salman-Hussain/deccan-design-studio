@@ -19,14 +19,16 @@ export interface ScenarioMeta {
   id: Scenario;
   label: string;
   blurb: string;
+  /** Simulated minute of the day where this scenario's effects are easiest to see. */
+  focusMin: number;
   outages: [number, number][];
 }
 
 export const SCENARIOS: ScenarioMeta[] = [
-  { id: "normal", label: "Normal day", blurb: "Clear skies, regular demand, no planned cuts.", outages: [] },
-  { id: "storm", label: "Storm day", blurb: "Rain and wind from 6 pm; discom cut 7 pm – midnight.", outages: [[19, 24]] },
-  { id: "heatwave", label: "Heatwave", blurb: "42 °C, high water demand, load-shedding 3 – 4:30 pm.", outages: [[15, 16.5]] },
-  { id: "peak", label: "Peak evening", blurb: "Evening load 1.5×, short feeder trip at 8:30 pm.", outages: [[20.5, 21.5]] },
+  { id: "normal", label: "Normal day", blurb: "Clear skies, regular demand, no planned cuts.", focusMin: 630, outages: [] },
+  { id: "storm", label: "Storm day", blurb: "Rain and wind from 6 pm; discom cut 7 pm – midnight.", focusMin: 1110, outages: [[19, 24]] },
+  { id: "heatwave", label: "Heatwave", blurb: "42 °C, high water demand, load-shedding 3 – 4:30 pm.", focusMin: 900, outages: [[15, 16.5]] },
+  { id: "peak", label: "Peak evening", blurb: "Evening load 1.5×, short feeder trip at 8:30 pm.", focusMin: 1230, outages: [[20.5, 21.5]] },
 ];
 export const SCENARIO_BY_ID = Object.fromEntries(SCENARIOS.map((s) => [s.id, s])) as Record<Scenario, ScenarioMeta>;
 
